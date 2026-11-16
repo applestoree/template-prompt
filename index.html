@@ -143,18 +143,28 @@
             </div>
 
             <!-- Logo Overlay Controls -->
-            <div id="logoOptionsRow" class="flex flex-wrap items-center gap-1.5">
-              <select id="logoPositionSelect" class="text-[11px] px-2.5 py-1.5 rounded-lg bg-[#F5F5F7] dark:bg-[#222225] border border-black/[0.05] dark:border-white/[0.08] outline-none">
-                <option value="top-center">Posisi: Top Center</option>
-                <option value="top-left">Posisi: Top Left</option>
-                <option value="bottom-right">Posisi: Bottom Right</option>
-                <option value="bottom-center">Posisi: Bottom Center</option>
-              </select>
-              <select id="logoToneSelect" class="text-[11px] px-2.5 py-1.5 rounded-lg bg-[#F5F5F7] dark:bg-[#222225] border border-black/[0.05] dark:border-white/[0.08] outline-none">
-                <option value="original">Warna: Original</option>
-                <option value="white">Warna: Putih (Invert)</option>
-                <option value="black">Warna: Hitam Pekat</option>
-              </select>
+            <div id="logoOptionsRow" class="space-y-1.5">
+              <div class="flex flex-wrap items-center gap-1.5">
+                <select id="logoPositionSelect" class="text-[11px] px-2.5 py-1.5 rounded-lg bg-[#F5F5F7] dark:bg-[#222225] border border-black/[0.05] dark:border-white/[0.08] outline-none">
+                  <option value="top-center">Posisi: Top Center</option>
+                  <option value="top-left">Posisi: Top Left</option>
+                  <option value="top-right">Posisi: Top Right</option>
+                  <option value="bottom-left">Posisi: Bottom Left</option>
+                  <option value="bottom-right">Posisi: Bottom Right</option>
+                  <option value="bottom-center">Posisi: Bottom Center</option>
+                </select>
+                <select id="logoToneSelect" class="text-[11px] px-2.5 py-1.5 rounded-lg bg-[#F5F5F7] dark:bg-[#222225] border border-black/[0.05] dark:border-white/[0.08] outline-none">
+                  <option value="auto" selected>Warna: Auto Contrast (Smart)</option>
+                  <option value="original">Warna: Original</option>
+                  <option value="white">Warna: White (#FFF)</option>
+                  <option value="black">Warna: Black (#111)</option>
+                </select>
+              </div>
+              <!-- Real-time Contrast Detection Badge -->
+              <div id="contrastStatusBadge" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-medium bg-zinc-100 dark:bg-zinc-800/90 text-zinc-700 dark:text-zinc-300 border border-black/[0.05] dark:border-white/[0.08]">
+                <span id="contrastStatusDot" class="w-2 h-2 rounded-full bg-zinc-900 dark:bg-white"></span>
+                <span id="contrastStatusText">Auto-detected: Light BG → Dark Logo</span>
+              </div>
             </div>
           </div>
         </div>
@@ -188,12 +198,101 @@
         <!-- Dynamic Variable Fields Container -->
         <div id="variablesContainer" class="space-y-4"></div>
 
-        <!-- Optional Headline / Tagline Text -->
-        <div class="pt-2 border-t border-black/[0.05] dark:border-white/[0.07]">
-          <label for="headlineInput" class="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">
-            Headline / Tagline Text <span class="text-zinc-400 font-normal">(Opsional untuk tipografi di poster)</span>
-          </label>
-          <input id="headlineInput" type="text" placeholder="Contoh: Titanium. So strong. So light. So Pro." class="w-full text-xs px-3.5 py-2.5 rounded-xl bg-[#F5F5F7] dark:bg-[#222225] border border-transparent focus:border-blue-500 focus:bg-white dark:focus:bg-[#1C1C1E] outline-none transition" />
+        <!-- Structured Typography Hierarchy Section -->
+        <div class="pt-3 border-t border-black/[0.06] dark:border-white/[0.08] space-y-3">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
+              <h3 class="text-xs font-semibold uppercase tracking-wider text-zinc-700 dark:text-zinc-200">Typography Content</h3>
+            </div>
+            <label class="inline-flex items-center gap-2 cursor-pointer select-none">
+              <input type="checkbox" id="typoStagePreviewToggle" checked class="sr-only peer" />
+              <div class="w-8 h-4 bg-zinc-200 dark:bg-zinc-700 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all relative peer-checked:bg-indigo-600"></div>
+              <span class="text-[11px] font-medium text-zinc-500 dark:text-zinc-400">Live Guide</span>
+            </label>
+          </div>
+
+          <!-- Typography Placement & Contrast Control -->
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label for="typoPlacementSelect" class="block text-[11px] font-medium text-zinc-500 dark:text-zinc-400 mb-1">Text Placement</label>
+              <select id="typoPlacementSelect" class="w-full text-[11px] px-2.5 py-2 rounded-xl bg-[#F5F5F7] dark:bg-[#222225] border border-black/[0.05] dark:border-white/[0.08] outline-none">
+                <option value="top-editorial">Top Editorial Block</option>
+                <option value="bottom-editorial" selected>Bottom Editorial Block</option>
+                <option value="split-top-bottom">Split (Title Top, Specs Bottom)</option>
+                <option value="left-aligned">Left Aligned Margin</option>
+              </select>
+            </div>
+            <div>
+              <label for="typoContrastSelect" class="block text-[11px] font-medium text-zinc-500 dark:text-zinc-400 mb-1">Text Contrast Mode</label>
+              <select id="typoContrastSelect" class="w-full text-[11px] px-2.5 py-2 rounded-xl bg-[#F5F5F7] dark:bg-[#222225] border border-black/[0.05] dark:border-white/[0.08] outline-none">
+                <option value="auto" selected>Auto Contrast (Smart)</option>
+                <option value="light-text">High-Contrast White Text</option>
+                <option value="dark-text">High-Contrast Obsidian Text</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- 1. Headline Field -->
+          <div class="p-3 rounded-2xl bg-[#F5F5F7]/80 dark:bg-[#1E1E21] border border-black/[0.04] dark:border-white/[0.06] space-y-2">
+            <div class="flex items-center justify-between">
+              <label for="headlineInput" class="text-xs font-semibold text-zinc-800 dark:text-zinc-200 flex items-center gap-1.5">
+                Headline
+                <span class="text-[10px] font-normal px-1.5 py-0.5 rounded bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">Primary</span>
+              </label>
+              <input type="checkbox" id="enableHeadline" checked class="w-3.5 h-3.5 rounded accent-blue-600 cursor-pointer" title="Aktifkan Headline" />
+            </div>
+            <div id="headlinePresets" class="flex flex-wrap gap-1"></div>
+            <input id="headlineInput" type="text" value="iPhone 17 Pro. Titanium Redefined." placeholder="Masukkan Headline utama..." class="w-full text-xs px-3 py-2 rounded-xl bg-white dark:bg-[#141416] border border-black/[0.06] dark:border-white/[0.08] focus:border-blue-500 outline-none transition" />
+          </div>
+
+          <!-- 2. Subheadline Field -->
+          <div class="p-3 rounded-2xl bg-[#F5F5F7]/80 dark:bg-[#1E1E21] border border-black/[0.04] dark:border-white/[0.06] space-y-2">
+            <div class="flex items-center justify-between">
+              <label for="subheadlineInput" class="text-xs font-semibold text-zinc-800 dark:text-zinc-200 flex items-center gap-1.5">
+                Subheadline
+                <span class="text-[10px] font-normal px-1.5 py-0.5 rounded bg-zinc-500/10 text-zinc-600 dark:text-zinc-400">Secondary</span>
+              </label>
+              <input type="checkbox" id="enableSubheadline" checked class="w-3.5 h-3.5 rounded accent-blue-600 cursor-pointer" title="Aktifkan Subheadline" />
+            </div>
+            <div id="subheadlinePresets" class="flex flex-wrap gap-1"></div>
+            <input id="subheadlineInput" type="text" value="A19 Pro chip. Pro camera system. All-day battery." placeholder="Masukkan Subheadline pendukung..." class="w-full text-xs px-3 py-2 rounded-xl bg-white dark:bg-[#141416] border border-black/[0.06] dark:border-white/[0.08] focus:border-blue-500 outline-none transition" />
+          </div>
+
+          <!-- 3. Body Text Field -->
+          <div class="p-3 rounded-2xl bg-[#F5F5F7]/80 dark:bg-[#1E1E21] border border-black/[0.04] dark:border-white/[0.06] space-y-2">
+            <div class="flex items-center justify-between">
+              <label for="bodyTextInput" class="text-xs font-semibold text-zinc-800 dark:text-zinc-200 flex items-center gap-1.5">
+                Body Text
+                <span class="text-[10px] font-normal px-1.5 py-0.5 rounded bg-zinc-500/10 text-zinc-600 dark:text-zinc-400">Copy</span>
+              </label>
+              <input type="checkbox" id="enableBodyText" checked class="w-3.5 h-3.5 rounded accent-blue-600 cursor-pointer" title="Aktifkan Body Text" />
+            </div>
+            <div id="bodyTextPresets" class="flex flex-wrap gap-1"></div>
+            <textarea id="bodyTextInput" rows="2" placeholder="Masukkan deskripsi singkat produk..." class="w-full text-xs px-3 py-2 rounded-xl bg-white dark:bg-[#141416] border border-black/[0.06] dark:border-white/[0.08] focus:border-blue-500 outline-none transition resize-none">Engineered from aerospace-grade titanium with an ultra-bright ProMotion display and precision-crafted Apple Watch Series 10.</textarea>
+          </div>
+
+          <!-- 4. Feature Callouts / Badges Field -->
+          <div class="p-3 rounded-2xl bg-[#F5F5F7]/80 dark:bg-[#1E1E21] border border-black/[0.04] dark:border-white/[0.06] space-y-2">
+            <div class="flex items-center justify-between">
+              <label for="featureInput" class="text-xs font-semibold text-zinc-800 dark:text-zinc-200 flex items-center gap-1.5">
+                Feature Callouts
+                <span class="text-[10px] font-normal px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">Badges</span>
+              </label>
+              <input type="checkbox" id="enableFeatures" checked class="w-3.5 h-3.5 rounded accent-blue-600 cursor-pointer" title="Aktifkan Feature Badges" />
+            </div>
+            <!-- Active Feature Chips -->
+            <div id="featureChipsContainer" class="flex flex-wrap gap-1.5"></div>
+            <!-- Quick Preset Feature Suggestions -->
+            <div id="featurePresets" class="flex flex-wrap gap-1 pt-0.5"></div>
+            <!-- Add Custom Feature Input -->
+            <div class="flex gap-1.5">
+              <input id="featureInput" type="text" placeholder="Tambah fitur (mis. 48MP Fusion Camera)..." class="flex-1 text-xs px-3 py-1.5 rounded-xl bg-white dark:bg-[#141416] border border-black/[0.06] dark:border-white/[0.08] focus:border-blue-500 outline-none transition" />
+              <button id="btnAddFeature" type="button" class="px-3 py-1.5 rounded-xl bg-zinc-900 dark:bg-white text-white dark:text-black text-[11px] font-medium hover:opacity-90 transition shrink-0">
+                + Add
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -282,6 +381,16 @@
             <!-- Live Logo Overlay on Preview Stage -->
             <div id="stageLogoOverlay" class="pointer-events-none absolute z-10 transition-all duration-300 top-6 left-1/2 -translate-x-1/2">
               <img id="stageLogoImg" src="https://jhpbtooefyzdndstlzva.supabase.co/storage/v1/object/public/apple/logo.png" alt="Brand Logo" crossorigin="anonymous" class="h-7 sm:h-8 w-auto object-contain drop-shadow-sm transition-all" />
+            </div>
+
+            <!-- Live Typography Hierarchy Guide Overlay (Visible on empty stage or when Live Guide toggled) -->
+            <div id="stageTypoOverlay" class="pointer-events-none absolute inset-x-5 z-10 transition-all duration-300 bottom-5 flex flex-col gap-1.5">
+              <div id="stageTypoHeaderGroup" class="space-y-1">
+                <h4 id="stageHeadlineText" class="text-base sm:text-lg font-bold tracking-tight leading-tight">iPhone 17 Pro. Titanium Redefined.</h4>
+                <p id="stageSubheadlineText" class="text-xs font-medium opacity-90 leading-snug">A19 Pro chip. Pro camera system. All-day battery.</p>
+                <p id="stageBodyText" class="text-[10px] opacity-75 leading-relaxed line-clamp-2">Engineered from aerospace-grade titanium with an ultra-bright ProMotion display and precision-crafted Apple Watch Series 10.</p>
+              </div>
+              <div id="stageFeaturesRow" class="flex flex-wrap gap-1 pt-1"></div>
             </div>
 
           </div>
@@ -383,23 +492,25 @@
       },
       {
         key: "typography",
-        label: "Typography",
-        defaultValue: "No text overlay, pure clean product visual",
+        label: "Typography Style",
+        defaultValue: "San Francisco Display Bold, clean geometric Apple-inspired editorial sans-serif",
         presets: [
-          "No text overlay, pure clean product visual",
-          "San Francisco style clean geometric sans-serif",
-          "Minimalist thin modern display typography",
-          "Bold luxury editorial headline"
+          "San Francisco Display Bold, clean geometric Apple-inspired editorial sans-serif",
+          "Minimalist Swiss Sans, ultra-clean Neo-Grotesque grid",
+          "Editorial Serif, refined luxury magazine display",
+          "Tech Monospace, precision hardware spec typography",
+          "No text overlay, pure clean product visual"
         ]
       },
       {
         key: "quality",
-        label: "Quality",
-        defaultValue: "8K photorealistic commercial render, ultra-sharp, flagship campaign grade",
+        label: "Quality & Render",
+        defaultValue: "8K resolution, photorealistic Octane studio render, razor-sharp focus",
         presets: [
-          "8K photorealistic commercial render, ultra-sharp, flagship campaign grade",
-          "Masterpiece medium-format studio photography, Octane render quality",
-          "Ultra-detailed industrial macro photography, f/8 crisp focus"
+          "8K resolution, photorealistic Octane studio render, razor-sharp focus",
+          "Ultra-detailed commercial macro photography, f/8 crisp depth",
+          "Cinema-grade 35mm medium format look, subtle film grain",
+          "Clean Apple keynote hardware render, zero artifacts"
         ]
       }
     ];
@@ -412,16 +523,56 @@
       { id: "16:9", label: "16:9", sub: "Wide", cssAspect: "16/9", maxWidthClass: "max-w-full" }
     ];
 
+    const TYPOGRAPHY_PRESETS = {
+      headline: [
+        "iPhone 17 Pro. Titanium Redefined.",
+        "Pro. Beyond Limits.",
+        "The Future on Your Wrist & Palm.",
+        "Pure Titanium Precision."
+      ],
+      subheadline: [
+        "A19 Pro chip. Pro camera system. All-day battery.",
+        "Thinner. Lighter. Faster than ever before.",
+        "Seamless ecosystem crafted for creators."
+      ],
+      bodyText: [
+        "Engineered from aerospace-grade titanium with an ultra-bright ProMotion display and precision-crafted Apple Watch Series 10.",
+        "Designed for peak performance with next-generation silicon, studio-grade optics, and all-day endurance."
+      ],
+      features: [
+        "A19 Pro Chip",
+        "48MP Fusion Camera",
+        "Grade 5 Titanium",
+        "Always-On Retina",
+        "4:5 Studio Edition",
+        "Spatial Video"
+      ]
+    };
+
     // Application State
     let state = {
       logoUrl: DEFAULT_LOGO_URL,
       logoOverlay: true,
       logoPosition: "top-center",
-      logoTone: "original",
+      logoTone: "auto",
+      resolvedLogoTone: "black", // 'white' | 'black' | 'original'
+      contrastReason: "Light BG",
       selectedProducts: ["iPhone 17 Pro", "Apple Watch Series 10"],
       customProducts: [],
       variables: {},
-      headline: "",
+      typographyContent: {
+        showGuide: true,
+        placement: "bottom-editorial",
+        contrastMode: "auto",
+        enableHeadline: true,
+        headline: "iPhone 17 Pro. Titanium Redefined.",
+        enableSubheadline: true,
+        subheadline: "A19 Pro chip. Pro camera system. All-day battery.",
+        enableBodyText: true,
+        bodyText: "Engineered from aerospace-grade titanium with an ultra-bright ProMotion display and precision-crafted Apple Watch Series 10.",
+        enableFeatures: true,
+        features: ["A19 Pro Chip", "48MP Fusion Camera", "4:5 Studio Edition"]
+      },
       ratio: "4:5",
       manualPromptOverride: false,
       currentImageDataUrl: null,
@@ -444,12 +595,37 @@
       logoPositionSelect: document.getElementById("logoPositionSelect"),
       logoToneSelect: document.getElementById("logoToneSelect"),
       logoOptionsRow: document.getElementById("logoOptionsRow"),
+      contrastStatusBadge: document.getElementById("contrastStatusBadge"),
+      contrastStatusDot: document.getElementById("contrastStatusDot"),
+      contrastStatusText: document.getElementById("contrastStatusText"),
       productChips: document.getElementById("productChips"),
       productCountBadge: document.getElementById("productCountBadge"),
       customProductInput: document.getElementById("customProductInput"),
       btnAddProduct: document.getElementById("btnAddProduct"),
       variablesContainer: document.getElementById("variablesContainer"),
+      typoStagePreviewToggle: document.getElementById("typoStagePreviewToggle"),
+      typoPlacementSelect: document.getElementById("typoPlacementSelect"),
+      typoContrastSelect: document.getElementById("typoContrastSelect"),
+      enableHeadline: document.getElementById("enableHeadline"),
+      headlinePresets: document.getElementById("headlinePresets"),
       headlineInput: document.getElementById("headlineInput"),
+      enableSubheadline: document.getElementById("enableSubheadline"),
+      subheadlinePresets: document.getElementById("subheadlinePresets"),
+      subheadlineInput: document.getElementById("subheadlineInput"),
+      enableBodyText: document.getElementById("enableBodyText"),
+      bodyTextPresets: document.getElementById("bodyTextPresets"),
+      bodyTextInput: document.getElementById("bodyTextInput"),
+      enableFeatures: document.getElementById("enableFeatures"),
+      featureChipsContainer: document.getElementById("featureChipsContainer"),
+      featurePresets: document.getElementById("featurePresets"),
+      featureInput: document.getElementById("featureInput"),
+      btnAddFeature: document.getElementById("btnAddFeature"),
+      stageTypoOverlay: document.getElementById("stageTypoOverlay"),
+      stageTypoHeaderGroup: document.getElementById("stageTypoHeaderGroup"),
+      stageHeadlineText: document.getElementById("stageHeadlineText"),
+      stageSubheadlineText: document.getElementById("stageSubheadlineText"),
+      stageBodyText: document.getElementById("stageBodyText"),
+      stageFeaturesRow: document.getElementById("stageFeaturesRow"),
       ratioPills: document.getElementById("ratioPills"),
       promptTextarea: document.getElementById("promptTextarea"),
       btnSyncPrompt: document.getElementById("btnSyncPrompt"),
@@ -586,12 +762,227 @@
 
         input.addEventListener("input", (e) => {
           state.variables[def.key] = e.target.value;
+          if (def.key === "background") {
+            updateLogoPreview();
+            updateTypographyStagePreview();
+          }
           updatePromptAndSummary();
         });
 
         wrapper.appendChild(input);
         el.variablesContainer.appendChild(wrapper);
       });
+    }
+
+    /**
+     * Render Typography Quick Presets & Feature Chips
+     */
+    function renderTypographyControls() {
+      const tc = state.typographyContent;
+
+      // Headline presets
+      el.headlinePresets.innerHTML = "";
+      TYPOGRAPHY_PRESETS.headline.forEach(text => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.textContent = text.length > 26 ? text.slice(0, 24) + "…" : text;
+        btn.title = text;
+        btn.className = tc.headline === text
+          ? "px-2 py-0.5 rounded-md text-[10px] font-medium bg-zinc-900 dark:bg-white text-white dark:text-black transition"
+          : "px-2 py-0.5 rounded-md text-[10px] font-medium bg-white dark:bg-[#141416] text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white border border-black/[0.05] dark:border-white/[0.06] transition";
+        btn.addEventListener("click", () => {
+          tc.headline = text;
+          tc.enableHeadline = true;
+          el.enableHeadline.checked = true;
+          el.headlineInput.value = text;
+          renderTypographyControls();
+          updateTypographyStagePreview();
+          updatePromptAndSummary();
+        });
+        el.headlinePresets.appendChild(btn);
+      });
+
+      // Subheadline presets
+      el.subheadlinePresets.innerHTML = "";
+      TYPOGRAPHY_PRESETS.subheadline.forEach(text => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.textContent = text.length > 28 ? text.slice(0, 26) + "…" : text;
+        btn.title = text;
+        btn.className = tc.subheadline === text
+          ? "px-2 py-0.5 rounded-md text-[10px] font-medium bg-zinc-900 dark:bg-white text-white dark:text-black transition"
+          : "px-2 py-0.5 rounded-md text-[10px] font-medium bg-white dark:bg-[#141416] text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white border border-black/[0.05] dark:border-white/[0.06] transition";
+        btn.addEventListener("click", () => {
+          tc.subheadline = text;
+          tc.enableSubheadline = true;
+          el.enableSubheadline.checked = true;
+          el.subheadlineInput.value = text;
+          renderTypographyControls();
+          updateTypographyStagePreview();
+          updatePromptAndSummary();
+        });
+        el.subheadlinePresets.appendChild(btn);
+      });
+
+      // Body Text presets
+      el.bodyTextPresets.innerHTML = "";
+      TYPOGRAPHY_PRESETS.bodyText.forEach((text, idx) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.textContent = `Copy Preset ${idx + 1}`;
+        btn.title = text;
+        btn.className = tc.bodyText === text
+          ? "px-2 py-0.5 rounded-md text-[10px] font-medium bg-zinc-900 dark:bg-white text-white dark:text-black transition"
+          : "px-2 py-0.5 rounded-md text-[10px] font-medium bg-white dark:bg-[#141416] text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white border border-black/[0.05] dark:border-white/[0.06] transition";
+        btn.addEventListener("click", () => {
+          tc.bodyText = text;
+          tc.enableBodyText = true;
+          el.enableBodyText.checked = true;
+          el.bodyTextInput.value = text;
+          renderTypographyControls();
+          updateTypographyStagePreview();
+          updatePromptAndSummary();
+        });
+        el.bodyTextPresets.appendChild(btn);
+      });
+
+      // Active Feature Chips (Removable)
+      el.featureChipsContainer.innerHTML = "";
+      tc.features.forEach(feat => {
+        const chip = document.createElement("span");
+        chip.className = "inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-medium bg-blue-600/10 text-blue-700 dark:text-blue-300 border border-blue-500/20";
+        chip.innerHTML = `
+          <span>${feat}</span>
+          <button type="button" class="hover:text-rose-500 font-bold leading-none ml-0.5" aria-label="Hapus fitur">&times;</button>
+        `;
+        chip.querySelector("button").addEventListener("click", () => {
+          tc.features = tc.features.filter(f => f !== feat);
+          renderTypographyControls();
+          updateTypographyStagePreview();
+          updatePromptAndSummary();
+        });
+        el.featureChipsContainer.appendChild(chip);
+      });
+
+      // Quick Feature Preset Suggestions
+      el.featurePresets.innerHTML = "";
+      TYPOGRAPHY_PRESETS.features.forEach(feat => {
+        if (tc.features.includes(feat)) return;
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.textContent = `+ ${feat}`;
+        btn.className = "px-2 py-0.5 rounded-md text-[10px] font-medium bg-white dark:bg-[#141416] text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white border border-dashed border-black/15 dark:border-white/15 transition";
+        btn.addEventListener("click", () => {
+          tc.features.push(feat);
+          tc.enableFeatures = true;
+          el.enableFeatures.checked = true;
+          renderTypographyControls();
+          updateTypographyStagePreview();
+          updatePromptAndSummary();
+        });
+        el.featurePresets.appendChild(btn);
+      });
+    }
+
+    /**
+     * Resolve Typography Contrast Tone (Light Text on Dark BG vs Dark Text on Light BG)
+     */
+    function resolveTypographyContrastTone() {
+      const mode = state.typographyContent.contrastMode;
+      if (mode === "light-text") return "white";
+      if (mode === "dark-text") return "black";
+
+      // Smart auto detection based on background keywords (matching logo contrast logic)
+      const kw = detectToneFromBackgroundKeywords(state.variables.background);
+      return kw.tone; // 'white' for dark BG, 'black' for light BG
+    }
+
+    /**
+     * Update Live Typography Hierarchy Guide on Preview Stage
+     */
+    function updateTypographyStagePreview() {
+      const tc = state.typographyContent;
+      const hasAnyText =
+        (tc.enableHeadline && tc.headline.trim()) ||
+        (tc.enableSubheadline && tc.subheadline.trim()) ||
+        (tc.enableBodyText && tc.bodyText.trim()) ||
+        (tc.enableFeatures && tc.features.length > 0);
+
+      // Hide guide if toggled off, if no text exists, or if user prefers clean image inspection after generation
+      if (!tc.showGuide || !hasAnyText) {
+        el.stageTypoOverlay.classList.add("hidden");
+        return;
+      }
+      el.stageTypoOverlay.classList.remove("hidden");
+
+      // Determine contrast styling
+      const textTone = resolveTypographyContrastTone();
+      const isWhiteText = textTone === "white";
+
+      el.stageTypoOverlay.className = "pointer-events-none absolute inset-x-5 z-10 transition-all duration-300 flex flex-col gap-1.5 rounded-2xl p-3.5 backdrop-blur-[2px]";
+      if (isWhiteText) {
+        el.stageTypoOverlay.classList.add("text-white", "bg-gradient-to-t", "from-black/55", "via-black/25", "to-transparent");
+      } else {
+        el.stageTypoOverlay.classList.add("text-zinc-900", "bg-gradient-to-t", "from-white/75", "via-white/40", "to-transparent");
+      }
+
+      // Placement positioning
+      if (tc.placement === "top-editorial") {
+        el.stageTypoOverlay.classList.add(state.logoOverlay && state.logoPosition.startsWith("top") ? "top-16" : "top-5", "text-center", "items-center");
+      } else if (tc.placement === "left-aligned") {
+        el.stageTypoOverlay.classList.add("bottom-5", "text-left", "items-start");
+      } else {
+        el.stageTypoOverlay.classList.add("bottom-5", "text-center", "items-center");
+      }
+
+      // Font family hint based on Typography Style variable
+      const styleLower = (state.variables.typography || "").toLowerCase();
+      if (styleLower.includes("serif")) {
+        el.stageTypoOverlay.style.fontFamily = "Georgia, 'Times New Roman', serif";
+      } else if (styleLower.includes("mono")) {
+        el.stageTypoOverlay.style.fontFamily = "ui-monospace, SFMono-Regular, Menlo, monospace";
+      } else {
+        el.stageTypoOverlay.style.fontFamily = "'Inter', -apple-system, BlinkMacSystemFont, sans-serif";
+      }
+
+      // Headline
+      if (tc.enableHeadline && tc.headline.trim()) {
+        el.stageHeadlineText.textContent = tc.headline.trim();
+        el.stageHeadlineText.classList.remove("hidden");
+      } else {
+        el.stageHeadlineText.classList.add("hidden");
+      }
+
+      // Subheadline
+      if (tc.enableSubheadline && tc.subheadline.trim()) {
+        el.stageSubheadlineText.textContent = tc.subheadline.trim();
+        el.stageSubheadlineText.classList.remove("hidden");
+      } else {
+        el.stageSubheadlineText.classList.add("hidden");
+      }
+
+      // Body Text
+      if (tc.enableBodyText && tc.bodyText.trim()) {
+        el.stageBodyText.textContent = tc.bodyText.trim();
+        el.stageBodyText.classList.remove("hidden");
+      } else {
+        el.stageBodyText.classList.add("hidden");
+      }
+
+      // Feature Badges
+      if (tc.enableFeatures && tc.features.length > 0) {
+        el.stageFeaturesRow.classList.remove("hidden");
+        el.stageFeaturesRow.className = `flex flex-wrap gap-1 pt-1 ${tc.placement === "left-aligned" ? "justify-start" : "justify-center"}`;
+        el.stageFeaturesRow.innerHTML = tc.features.map(f => `
+          <span class="text-[9px] font-semibold tracking-wide px-2 py-0.5 rounded-full border ${
+            isWhiteText
+              ? "bg-white/15 text-white border-white/25"
+              : "bg-black/10 text-zinc-900 border-black/15"
+          }">${f}</span>
+        `).join("");
+      } else {
+        el.stageFeaturesRow.classList.add("hidden");
+      }
     }
 
     /**
@@ -636,9 +1027,160 @@
     }
 
     /**
-     * Update Live Logo Preview & Stage Overlay Position/Filter
+     * Layer A: Keyword-Based Background Luminance Detection
      */
-    function updateLogoPreview() {
+    function detectToneFromBackgroundKeywords(bgText) {
+      const text = (bgText || "").toLowerCase();
+      const darkKeywords = [
+        "dark", "midnight", "black", "night", "shadow", "obsidian",
+        "space", "deep", "noir", "charcoal", "slate"
+      ];
+      const lightKeywords = [
+        "white", "clean", "light", "bright", "cream", "pastel",
+        "snow", "silver", "ivory", "minimal", "day"
+      ];
+
+      let darkScore = 0;
+      let lightScore = 0;
+
+      darkKeywords.forEach(kw => {
+        if (text.includes(kw)) darkScore++;
+      });
+      lightKeywords.forEach(kw => {
+        if (text.includes(kw)) lightScore++;
+      });
+
+      if (darkScore > lightScore) {
+        return { tone: "white", reason: "Dark BG" };
+      }
+      if (lightScore > darkScore) {
+        return { tone: "black", reason: "Light BG" };
+      }
+      // Fallback to current UI theme brightness if neutral/ambiguous
+      const isDarkUI = document.documentElement.classList.contains("dark");
+      return isDarkUI
+        ? { tone: "white", reason: "Dark Stage" }
+        : { tone: "black", reason: "Light Stage" };
+    }
+
+    /**
+     * Layer B: Real-Time Pixel Relative Luminance Sampling on Generated Image
+     */
+    function sampleImageLuminanceAtLogoArea(imgElement, position) {
+      return new Promise((resolve) => {
+        if (!imgElement || !imgElement.src || imgElement.classList.contains("hidden") || !imgElement.complete || !imgElement.naturalWidth) {
+          resolve(null);
+          return;
+        }
+
+        try {
+          const sampleCanvas = document.createElement("canvas");
+          const w = 160;
+          const h = 200;
+          sampleCanvas.width = w;
+          sampleCanvas.height = h;
+          const ctx = sampleCanvas.getContext("2d", { willReadFrequently: true });
+          ctx.drawImage(imgElement, 0, 0, w, h);
+
+          // Define sampling bounding box matching the logo position
+          const boxW = Math.round(w * 0.28);
+          const boxH = Math.round(h * 0.14);
+          const padX = Math.round(w * 0.06);
+          const padY = Math.round(h * 0.05);
+
+          let sx = Math.round((w - boxW) / 2);
+          let sy = padY;
+
+          switch (position) {
+            case "top-left":
+              sx = padX;
+              sy = padY;
+              break;
+            case "top-right":
+              sx = w - boxW - padX;
+              sy = padY;
+              break;
+            case "top-center":
+              sx = Math.round((w - boxW) / 2);
+              sy = padY;
+              break;
+            case "bottom-left":
+              sx = padX;
+              sy = h - boxH - padY;
+              break;
+            case "bottom-right":
+              sx = w - boxW - padX;
+              sy = h - boxH - padY;
+              break;
+            case "bottom-center":
+              sx = Math.round((w - boxW) / 2);
+              sy = h - boxH - padY;
+              break;
+          }
+
+          const imageData = ctx.getImageData(sx, sy, boxW, boxH).data;
+          let totalLuminance = 0;
+          let pixelCount = 0;
+
+          for (let i = 0; i < imageData.length; i += 4) {
+            // Convert sRGB to linear relative luminance (WCAG formula)
+            const rLin = Math.pow(imageData[i] / 255, 2.2);
+            const gLin = Math.pow(imageData[i + 1] / 255, 2.2);
+            const bLin = Math.pow(imageData[i + 2] / 255, 2.2);
+            const lum = 0.2126 * rLin + 0.7152 * gLin + 0.0722 * bLin;
+            totalLuminance += lum;
+            pixelCount++;
+          }
+
+          const avgLuminance = pixelCount > 0 ? totalLuminance / pixelCount : 0.5;
+          resolve(avgLuminance);
+        } catch (err) {
+          resolve(null);
+        }
+      });
+    }
+
+    /**
+     * Resolve Active Logo Contrast Tone (Auto Smart vs Manual) & Update UI
+     */
+    async function resolveLogoContrastState() {
+      if (state.logoTone !== "auto") {
+        state.resolvedLogoTone = state.logoTone;
+        const manualLabels = {
+          original: "Manual: Original Brand Color",
+          white: "Manual: Pure White (#FFFFFF)",
+          black: "Manual: Deep Black (#111111)"
+        };
+        state.contrastReason = manualLabels[state.logoTone] || "Manual";
+        return;
+      }
+
+      // Layer B takes precedence if a generated image is visible on stage
+      const sampledLum = await sampleImageLuminanceAtLogoArea(el.generatedImg, state.logoPosition);
+      if (sampledLum !== null) {
+        const lumPct = Math.round(sampledLum * 100);
+        if (sampledLum < 0.5) {
+          state.resolvedLogoTone = "white";
+          state.contrastReason = `Auto-detected: Dark Area (${lumPct}% lum) → White Logo`;
+        } else {
+          state.resolvedLogoTone = "black";
+          state.contrastReason = `Auto-detected: Light Area (${lumPct}% lum) → Dark Logo`;
+        }
+        return;
+      }
+
+      // Layer A fallback: analyze background prompt keywords
+      const kwResult = detectToneFromBackgroundKeywords(state.variables.background);
+      state.resolvedLogoTone = kwResult.tone;
+      state.contrastReason = kwResult.tone === "white"
+        ? `Auto-detected: ${kwResult.reason} → White Logo`
+        : `Auto-detected: ${kwResult.reason} → Dark Logo`;
+    }
+
+    /**
+     * Update Live Logo Preview, Contrast Status Badge & Stage Overlay Position/Filter
+     */
+    async function updateLogoPreview() {
       const url = state.logoUrl.trim();
       el.logoThumb.src = url || DEFAULT_LOGO_URL;
       el.stageLogoImg.src = url || DEFAULT_LOGO_URL;
@@ -652,17 +1194,43 @@
         el.logoOptionsRow.classList.add("opacity-40", "pointer-events-none");
       }
 
-      // Apply tone filter
-      let filterCss = "none";
-      if (state.logoTone === "white") {
-        filterCss = "brightness(0) invert(1)";
-      } else if (state.logoTone === "black") {
-        filterCss = "brightness(0)";
-      }
-      el.logoThumb.style.filter = filterCss;
-      el.stageLogoImg.style.filter = filterCss;
+      // Compute effective tone (Auto-Contrast or Manual)
+      await resolveLogoContrastState();
 
-      // Apply position classes on preview frame
+      // Update Contrast Status Indicator Badge
+      el.contrastStatusText.textContent = state.contrastReason;
+      if (state.resolvedLogoTone === "white") {
+        el.contrastStatusDot.className = "w-2.5 h-2.5 rounded-full bg-white border border-zinc-400 shadow-sm shrink-0";
+      } else if (state.resolvedLogoTone === "black") {
+        el.contrastStatusDot.className = "w-2.5 h-2.5 rounded-full bg-[#111111] border border-zinc-400 shadow-sm shrink-0";
+      } else {
+        el.contrastStatusDot.className = "w-2.5 h-2.5 rounded-full bg-gradient-to-tr from-blue-500 to-emerald-400 shrink-0";
+      }
+
+      // Apply high-contrast CSS filter on stage logo & thumbnail
+      let stageFilterCss = "none";
+      let thumbFilterCss = "none";
+      const thumbBox = el.logoThumb.parentElement;
+
+      if (state.resolvedLogoTone === "white") {
+        stageFilterCss = "brightness(0) invert(1) drop-shadow(0 2px 8px rgba(0, 0, 0, 0.45))";
+        thumbFilterCss = "brightness(0) invert(1)";
+        thumbBox.classList.remove("bg-[#F5F5F7]", "dark:bg-[#222225]");
+        thumbBox.classList.add("bg-zinc-900");
+      } else if (state.resolvedLogoTone === "black") {
+        stageFilterCss = "brightness(0) saturate(100%) contrast(115%) drop-shadow(0 1px 4px rgba(255, 255, 255, 0.35))";
+        thumbFilterCss = "brightness(0) saturate(100%)";
+        thumbBox.classList.remove("bg-zinc-900");
+        thumbBox.classList.add("bg-[#F5F5F7]", "dark:bg-[#222225]");
+      } else {
+        thumbBox.classList.remove("bg-zinc-900");
+        thumbBox.classList.add("bg-[#F5F5F7]", "dark:bg-[#222225]");
+      }
+
+      el.logoThumb.style.filter = thumbFilterCss;
+      el.stageLogoImg.style.filter = stageFilterCss;
+
+      // Apply position classes on preview frame (6 positions supported)
       el.stageLogoOverlay.className = "pointer-events-none absolute z-10 transition-all duration-300";
       switch (state.logoPosition) {
         case "top-center":
@@ -670,6 +1238,12 @@
           break;
         case "top-left":
           el.stageLogoOverlay.classList.add("top-6", "left-6");
+          break;
+        case "top-right":
+          el.stageLogoOverlay.classList.add("top-6", "right-6");
+          break;
+        case "bottom-left":
+          el.stageLogoOverlay.classList.add("bottom-6", "left-6");
           break;
         case "bottom-right":
           el.stageLogoOverlay.classList.add("bottom-6", "right-6");
@@ -686,7 +1260,7 @@
     function buildCompiledPrompt() {
       const productsStr = state.selectedProducts.join(" and ");
       const v = state.variables;
-      const headline = state.headline.trim();
+      const tc = state.typographyContent;
 
       let promptParts = [
         `Commercial flagship product photography featuring ${productsStr}.`,
@@ -697,8 +1271,37 @@
         `Lighting setup: ${v.lighting}.`
       ];
 
-      if (headline) {
-        promptParts.push(`Typography style: ${v.typography}, cleanly displaying the headline text "${headline}".`);
+      // Build structured typographic hierarchy instructions
+      const typoItems = [];
+      if (tc.enableHeadline && tc.headline.trim()) {
+        typoItems.push(`Headline (largest primary focal text, exact spelling): "${tc.headline.trim()}"`);
+      }
+      if (tc.enableSubheadline && tc.subheadline.trim()) {
+        typoItems.push(`Subheadline (secondary supporting text below headline): "${tc.subheadline.trim()}"`);
+      }
+      if (tc.enableBodyText && tc.bodyText.trim()) {
+        typoItems.push(`Body text (clean, refined descriptive copy): "${tc.bodyText.trim()}"`);
+      }
+      if (tc.enableFeatures && tc.features.length > 0) {
+        typoItems.push(`Feature highlight badges/callouts: [${tc.features.map(f => `"${f}"`).join(", ")}]`);
+      }
+
+      const resolvedTextTone = resolveTypographyContrastTone();
+      const contrastDirective = resolvedTextTone === "white"
+        ? "crisp high-contrast pure white (#FFFFFF) typography with subtle drop shadow for maximum legibility against the dark background"
+        : "crisp high-contrast deep obsidian (#111111) typography for maximum legibility against the light background";
+
+      const placementMap = {
+        "top-editorial": "arranged cleanly in the upper editorial margin",
+        "bottom-editorial": "arranged cleanly in the lower editorial margin",
+        "split-top-bottom": "with Headline & Subheadline at the top and Body Text & Feature badges anchored cleanly at the bottom",
+        "left-aligned": "left-aligned cleanly along the editorial grid margin"
+      };
+
+      if (typoItems.length > 0 && !v.typography.toLowerCase().includes("no text")) {
+        promptParts.push(
+          `Typography & Editorial Hierarchy: Render ${v.typography} ${placementMap[tc.placement] || "in clean negative space"}, using ${contrastDirective}. Include exact spelled text hierarchy: ${typoItems.join("; ")}.`
+        );
       } else {
         promptParts.push(`Typography & text: ${v.typography}.`);
       }
@@ -722,9 +1325,11 @@
       }
 
       // Render quick summary pills beneath preview stage
+      const tc = state.typographyContent;
       const pills = [
         ...state.selectedProducts,
         state.variables.background,
+        ...(tc.enableFeatures ? tc.features.slice(0, 2) : []),
         state.ratio
       ].filter(Boolean);
 
@@ -817,6 +1422,18 @@
         el.generatedImg.classList.remove("hidden");
         el.btnDownload.disabled = false;
 
+        // Auto-hide live guide overlay once AI image with rendered typography is generated (user can toggle back on anytime)
+        state.typographyContent.showGuide = false;
+        el.typoStagePreviewToggle.checked = false;
+        updateTypographyStagePreview();
+
+        // Wait for image decode so pixel luminance sampling runs accurately on the new render
+        await new Promise((resolve) => {
+          if (el.generatedImg.complete) resolve();
+          else el.generatedImg.onload = resolve;
+        });
+        await updateLogoPreview();
+
         // Add to History
         const historyItem = {
           id: Date.now(),
@@ -863,7 +1480,7 @@
           <img src="${item.imageUrl}" alt="History thumbnail" class="w-full h-full object-cover" />
           <span class="absolute bottom-1 right-1 text-[9px] font-semibold px-1.5 py-0.2 rounded bg-black/70 text-white">${item.ratio}</span>
         `;
-        thumbBtn.addEventListener("click", () => {
+        thumbBtn.addEventListener("click", async () => {
           state.currentImageDataUrl = item.imageUrl;
           el.generatedImg.src = item.imageUrl;
           el.generatedImg.classList.remove("hidden");
@@ -877,17 +1494,57 @@
             applyStageRatio(ratioOpt);
             renderRatioPills();
           }
-          showToast("Memuat gambar dari riwayat.", "info");
+
+          await new Promise((resolve) => {
+            if (el.generatedImg.complete) resolve();
+            else el.generatedImg.onload = resolve;
+          });
+          await updateLogoPreview();
+          showToast("Memuat gambar dari riwayat & menyelaraskan kontras logo.", "info");
         });
         el.historyGallery.appendChild(thumbBtn);
       });
     }
 
     /**
-     * Composite Generated Image + Crisp Logo Overlay onto Canvas & Download PNG
+     * Render Recolored High-Contrast Logo onto an Offscreen Canvas (Pixel Manipulation)
+     */
+    function createRecoloredLogoCanvas(logoImg, targetWidth, targetHeight, tone) {
+      const offCanvas = document.createElement("canvas");
+      offCanvas.width = targetWidth;
+      offCanvas.height = targetHeight;
+      const offCtx = offCanvas.getContext("2d", { willReadFrequently: true });
+      offCtx.drawImage(logoImg, 0, 0, targetWidth, targetHeight);
+
+      if (tone === "white" || tone === "black") {
+        const imgData = offCtx.getImageData(0, 0, targetWidth, targetHeight);
+        const data = imgData.data;
+        const targetR = tone === "white" ? 255 : 17;
+        const targetG = tone === "white" ? 255 : 17;
+        const targetB = tone === "white" ? 255 : 17;
+
+        for (let i = 0; i < data.length; i += 4) {
+          const alpha = data[i + 3];
+          if (alpha > 0) {
+            data[i] = targetR;
+            data[i + 1] = targetG;
+            data[i + 2] = targetB;
+          }
+        }
+        offCtx.putImageData(imgData, 0, 0);
+      }
+
+      return offCanvas;
+    }
+
+    /**
+     * Composite Generated Image + Crisp Recolored Logo Overlay onto Canvas & Download PNG
      */
     async function handleDownloadPng() {
       if (!state.currentImageDataUrl) return;
+
+      // Ensure latest contrast calculation is up to date
+      await resolveLogoContrastState();
 
       const canvas = el.exportCanvas;
       const ctx = canvas.getContext("2d");
@@ -906,32 +1563,60 @@
         if (state.logoOverlay && state.logoUrl.trim()) {
           try {
             const logoImg = await loadLogoForCanvas(state.logoUrl.trim());
-            const targetHeight = Math.round(canvas.height * 0.055);
+            const targetHeight = Math.max(24, Math.round(canvas.height * 0.055));
             const aspect = logoImg.naturalWidth / (logoImg.naturalHeight || 1);
-            const targetWidth = Math.round(targetHeight * aspect);
-            const margin = Math.round(canvas.width * 0.055);
+            const targetWidth = Math.max(24, Math.round(targetHeight * aspect));
+            const marginX = Math.round(canvas.width * 0.055);
+            const marginY = Math.round(canvas.height * 0.048);
 
             let x = (canvas.width - targetWidth) / 2;
-            let y = margin;
+            let y = marginY;
 
-            if (state.logoPosition === "top-left") {
-              x = margin;
-              y = margin;
-            } else if (state.logoPosition === "bottom-right") {
-              x = canvas.width - targetWidth - margin;
-              y = canvas.height - targetHeight - margin;
-            } else if (state.logoPosition === "bottom-center") {
-              x = (canvas.width - targetWidth) / 2;
-              y = canvas.height - targetHeight - margin;
+            switch (state.logoPosition) {
+              case "top-left":
+                x = marginX;
+                y = marginY;
+                break;
+              case "top-right":
+                x = canvas.width - targetWidth - marginX;
+                y = marginY;
+                break;
+              case "top-center":
+                x = (canvas.width - targetWidth) / 2;
+                y = marginY;
+                break;
+              case "bottom-left":
+                x = marginX;
+                y = canvas.height - targetHeight - marginY;
+                break;
+              case "bottom-right":
+                x = canvas.width - targetWidth - marginX;
+                y = canvas.height - targetHeight - marginY;
+                break;
+              case "bottom-center":
+                x = (canvas.width - targetWidth) / 2;
+                y = canvas.height - targetHeight - marginY;
+                break;
             }
+
+            // Use pixel-accurate offscreen recoloring so exported PNG matches preview 100%
+            const recoloredLogo = createRecoloredLogoCanvas(
+              logoImg,
+              targetWidth,
+              targetHeight,
+              state.resolvedLogoTone
+            );
 
             ctx.save();
-            if (state.logoTone === "white") {
-              ctx.filter = "brightness(0) invert(1)";
-            } else if (state.logoTone === "black") {
-              ctx.filter = "brightness(0)";
+            if (state.resolvedLogoTone === "white") {
+              ctx.shadowColor = "rgba(0, 0, 0, 0.35)";
+              ctx.shadowBlur = Math.round(targetHeight * 0.25);
+              ctx.shadowOffsetY = Math.round(targetHeight * 0.06);
+            } else if (state.resolvedLogoTone === "black") {
+              ctx.shadowColor = "rgba(255, 255, 255, 0.25)";
+              ctx.shadowBlur = Math.round(targetHeight * 0.15);
             }
-            ctx.drawImage(logoImg, x, y, targetWidth, targetHeight);
+            ctx.drawImage(recoloredLogo, x, y, targetWidth, targetHeight);
             ctx.restore();
           } catch (e) {
             // Fallback: export base image cleanly if external logo blocks CORS canvas taint
@@ -948,7 +1633,7 @@
           document.body.appendChild(link);
           link.click();
           link.remove();
-          showToast("PNG berhasil diunduh!", "success");
+          showToast("PNG beresolusi tinggi berhasil diunduh!", "success");
         } catch (err) {
           // Direct download fallback if canvas tainted
           const link = document.createElement("a");
@@ -989,6 +1674,7 @@
       state.manualPromptOverride = false;
       renderProductChips();
       renderVariables();
+      updateLogoPreview();
       updatePromptAndSummary();
       showToast("Preset diacak secara otomatis!", "info");
     }
@@ -1000,9 +1686,21 @@
       state.logoUrl = DEFAULT_LOGO_URL;
       state.logoOverlay = true;
       state.logoPosition = "top-center";
-      state.logoTone = "original";
+      state.logoTone = "auto";
       state.selectedProducts = ["iPhone 17 Pro", "Apple Watch Series 10"];
-      state.headline = "";
+      state.typographyContent = {
+        showGuide: true,
+        placement: "bottom-editorial",
+        contrastMode: "auto",
+        enableHeadline: true,
+        headline: "iPhone 17 Pro. Titanium Redefined.",
+        enableSubheadline: true,
+        subheadline: "A19 Pro chip. Pro camera system. All-day battery.",
+        enableBodyText: true,
+        bodyText: "Engineered from aerospace-grade titanium with an ultra-bright ProMotion display and precision-crafted Apple Watch Series 10.",
+        enableFeatures: true,
+        features: ["A19 Pro Chip", "48MP Fusion Camera", "4:5 Studio Edition"]
+      };
       state.ratio = "4:5";
       state.manualPromptOverride = false;
 
@@ -1013,15 +1711,28 @@
       el.logoUrlInput.value = DEFAULT_LOGO_URL;
       el.logoOverlayToggle.checked = true;
       el.logoPositionSelect.value = "top-center";
-      el.logoToneSelect.value = "original";
-      el.headlineInput.value = "";
+      el.logoToneSelect.value = "auto";
+
+      el.typoStagePreviewToggle.checked = true;
+      el.typoPlacementSelect.value = "bottom-editorial";
+      el.typoContrastSelect.value = "auto";
+      el.enableHeadline.checked = true;
+      el.headlineInput.value = state.typographyContent.headline;
+      el.enableSubheadline.checked = true;
+      el.subheadlineInput.value = state.typographyContent.subheadline;
+      el.enableBodyText.checked = true;
+      el.bodyTextInput.value = state.typographyContent.bodyText;
+      el.enableFeatures.checked = true;
+      el.featureInput.value = "";
 
       const defaultRatio = RATIO_OPTIONS[0];
       applyStageRatio(defaultRatio);
       renderProductChips();
       renderVariables();
+      renderTypographyControls();
       renderRatioPills();
       updateLogoPreview();
+      updateTypographyStagePreview();
       updatePromptAndSummary();
       showToast("Pengaturan dikembalikan ke default.", "info");
     }
@@ -1033,12 +1744,17 @@
       // Theme toggle
       el.btnTheme.addEventListener("click", () => {
         document.documentElement.classList.toggle("dark");
+        updateLogoPreview();
+        updateTypographyStagePreview();
       });
 
-      // Logo URL input
+      // Logo URL input listener
       el.logoUrlInput.addEventListener("input", (e) => {
-        state.logoUrl = e.target.value;
-        updateLogoPreview();
+        const val = e.target.value.trim();
+        if (val && val !== "(Uploaded Local Logo)") {
+          state.logoUrl = val;
+          updateLogoPreview();
+        }
       });
 
       // Local Logo Upload
@@ -1059,18 +1775,105 @@
       el.logoOverlayToggle.addEventListener("change", (e) => {
         state.logoOverlay = e.target.checked;
         updateLogoPreview();
+        updateTypographyStagePreview();
         updatePromptAndSummary();
       });
 
       el.logoPositionSelect.addEventListener("change", (e) => {
         state.logoPosition = e.target.value;
         updateLogoPreview();
+        updateTypographyStagePreview();
         updatePromptAndSummary();
       });
 
       el.logoToneSelect.addEventListener("change", (e) => {
         state.logoTone = e.target.value;
         updateLogoPreview();
+      });
+
+      // Typography Content Controls
+      el.typoStagePreviewToggle.addEventListener("change", (e) => {
+        state.typographyContent.showGuide = e.target.checked;
+        updateTypographyStagePreview();
+      });
+
+      el.typoPlacementSelect.addEventListener("change", (e) => {
+        state.typographyContent.placement = e.target.value;
+        updateTypographyStagePreview();
+        updatePromptAndSummary();
+      });
+
+      el.typoContrastSelect.addEventListener("change", (e) => {
+        state.typographyContent.contrastMode = e.target.value;
+        updateTypographyStagePreview();
+        updatePromptAndSummary();
+      });
+
+      el.enableHeadline.addEventListener("change", (e) => {
+        state.typographyContent.enableHeadline = e.target.checked;
+        updateTypographyStagePreview();
+        updatePromptAndSummary();
+      });
+
+      el.headlineInput.addEventListener("input", (e) => {
+        state.typographyContent.headline = e.target.value;
+        renderTypographyControls();
+        updateTypographyStagePreview();
+        updatePromptAndSummary();
+      });
+
+      el.enableSubheadline.addEventListener("change", (e) => {
+        state.typographyContent.enableSubheadline = e.target.checked;
+        updateTypographyStagePreview();
+        updatePromptAndSummary();
+      });
+
+      el.subheadlineInput.addEventListener("input", (e) => {
+        state.typographyContent.subheadline = e.target.value;
+        renderTypographyControls();
+        updateTypographyStagePreview();
+        updatePromptAndSummary();
+      });
+
+      el.enableBodyText.addEventListener("change", (e) => {
+        state.typographyContent.enableBodyText = e.target.checked;
+        updateTypographyStagePreview();
+        updatePromptAndSummary();
+      });
+
+      el.bodyTextInput.addEventListener("input", (e) => {
+        state.typographyContent.bodyText = e.target.value;
+        renderTypographyControls();
+        updateTypographyStagePreview();
+        updatePromptAndSummary();
+      });
+
+      el.enableFeatures.addEventListener("change", (e) => {
+        state.typographyContent.enableFeatures = e.target.checked;
+        updateTypographyStagePreview();
+        updatePromptAndSummary();
+      });
+
+      const addCustomFeature = () => {
+        const val = el.featureInput.value.trim();
+        if (!val) return;
+        if (!state.typographyContent.features.includes(val)) {
+          state.typographyContent.features.push(val);
+        }
+        state.typographyContent.enableFeatures = true;
+        el.enableFeatures.checked = true;
+        el.featureInput.value = "";
+        renderTypographyControls();
+        updateTypographyStagePreview();
+        updatePromptAndSummary();
+      };
+
+      el.btnAddFeature.addEventListener("click", addCustomFeature);
+      el.featureInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          addCustomFeature();
+        }
       });
 
       // Add Custom Product
@@ -1094,12 +1897,6 @@
           e.preventDefault();
           addCustomProduct();
         }
-      });
-
-      // Headline text
-      el.headlineInput.addEventListener("input", (e) => {
-        state.headline = e.target.value;
-        updatePromptAndSummary();
       });
 
       // Prompt manual edit tracking
@@ -1134,9 +1931,11 @@
     window.addEventListener("DOMContentLoaded", () => {
       renderProductChips();
       renderVariables();
+      renderTypographyControls();
       renderRatioPills();
       applyStageRatio(RATIO_OPTIONS[0]);
       updateLogoPreview();
+      updateTypographyStagePreview();
       updatePromptAndSummary();
       bindEvents();
     });

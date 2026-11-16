@@ -1940,5 +1940,144 @@
       bindEvents();
     });
   </script>
+
+<script>
+/* AUD-04–AUD-09 modular architecture */
+const AUD_KEY="studio-ai-aud04-09-v1";
+const AUD_TEXT_SKILLS=[
+["headline","Headline","primary"],["subheadline","Subheadline","secondary"],["bodyText","Body Text","supporting"],
+["highlightText","Highlight Text","highlight"],["featureText","Feature Text","feature"],["ctaText","CTA Text","action"],
+["priceText","Price Text","price"],["badgeText","Badge Text","badge"],["supportingText","Supporting Text","supporting"],["disclaimerText","Disclaimer Text","legal"]
+];
+const AUD_LAYOUTS=["Editorial campaign poster with generous negative space","Clean luxury catalog card framing","Split asymmetric showcase","Minimalist centered gallery frame","Single Hero Product","Dual Product Composition","Multi Product Composition"];
+const AUD_CATEGORIES=[
+{id:"product-content",name:"Product Content",subcategories:[{id:"product-showcase",name:"Product Showcase"},{id:"product-features",name:"Product Features"},{id:"product-comparison",name:"Product Comparison"}]},
+{id:"promotion-content",name:"Promotion Content",subcategories:[{id:"price-promotion",name:"Price Promotion"},{id:"campaign",name:"Campaign"}]},
+{id:"education-content",name:"Education Content",subcategories:[{id:"tips",name:"Tips & How-to"},{id:"feature-education",name:"Feature Education"}]},
+{id:"lifestyle-content",name:"Lifestyle Content",subcategories:[{id:"ecosystem",name:"Apple Ecosystem"},{id:"daily-use",name:"Everyday Use"}]}
+];
+const AUD_VISUAL=[
+{key:"colorMood",label:"Color & Mood",defaultValue:"premium neutral color palette with refined cinematic mood",presets:["premium neutral color palette with refined cinematic mood","cool titanium monochrome","warm minimal luxury","vibrant contemporary color palette"]},
+{key:"negativeConstraints",label:"Negative Constraints",defaultValue:"",presets:["no extra products","no distorted product geometry","no incorrect logos or branding","no watermark"]}
+];
+const AUD_DEFAULT_TEXT=Object.fromEntries(AUD_TEXT_SKILLS.map(([k,l,h])=>[k,{enabled:["headline","subheadline","bodyText","featureText"].includes(k),value:k==="headline"?state.typographyContent.headline:k==="subheadline"?state.typographyContent.subheadline:k==="bodyText"?state.typographyContent.bodyText:k==="featureText"?state.typographyContent.features.join(", "):"",placement:state.typographyContent.placement,hierarchy:h,style:"",size:"",alignment:"left",color:"auto"}]));
+state.architecture={categoryId:"product-content",subcategoryId:"product-showcase",layout:{enabled:true,preset:"Editorial campaign poster with generous negative space",configuration:{}},textElements:JSON.parse(JSON.stringify(AUD_DEFAULT_TEXT)),visualDirection:{},userConfigurations:{},conflicts:[]};
+for(let i=VARIABLE_DEFINITIONS.length-1;i>=0;i--)if(["layout","typography"].includes(VARIABLE_DEFINITIONS[i].key))VARIABLE_DEFINITIONS.splice(i,1);
+AUD_VISUAL.forEach(d=>{VARIABLE_DEFINITIONS.push(d);state.variables[d.key]=d.defaultValue;});
+state.architecture.visualDirection={
+background:{enabled:true,value:state.variables.background},composition:{enabled:true,value:state.variables.composition},
+lighting:{enabled:true,value:state.variables.lighting},visualStyle:{enabled:true,value:state.variables.visual},
+colorMood:{enabled:true,value:AUD_VISUAL[0].defaultValue},negativeConstraints:{enabled:false,value:""}
+};
+function audMerge(a,b){if(!b||typeof b!=="object")return structuredClone(a);const o=structuredClone(a);for(const k of Object.keys(b)){const x=o[k],y=b[k];o[k]=x&&y&&typeof x==="object"&&typeof y==="object"&&!Array.isArray(x)&&!Array.isArray(y)?audMerge(x,y):structuredClone(y);}return o;}
+function audKey(c,s){return c+"/"+s;}
+function audSave(){
+const a=state.architecture;if(!a.categoryId||!a.subcategoryId)return;
+a.userConfigurations[audKey(a.categoryId,a.subcategoryId)]={layout:structuredClone(a.layout),textElements:structuredClone(a.textElements),visualDirection:structuredClone(a.visualDirection)};
+try{localStorage.setItem(AUD_KEY,JSON.stringify({categories:AUD_CATEGORIES,profiles:a.userConfigurations}));}catch(e){}
+}
+function audLoad(){try{const x=JSON.parse(localStorage.getItem(AUD_KEY)||"{}");if(x.profiles)state.architecture.userConfigurations=x.profiles;if(Array.isArray(x.categories)&&x.categories.length)AUD_CATEGORIES.splice(0,AUD_CATEGORIES.length,...x.categories);}catch(e){}}
+function audSyncLegacy(){
+const t=state.architecture.textElements,o=state.typographyContent;
+o.enableHeadline=t.headline.enabled;o.headline=t.headline.value;o.enableSubheadline=t.subheadline.enabled;o.subheadline=t.subheadline.value;
+o.enableBodyText=t.bodyText.enabled;o.bodyText=t.bodyText.value;o.enableFeatures=t.featureText.enabled;o.features=t.featureText.value.split(",").map(x=>x.trim()).filter(Boolean);
+el.headlineInput.value=o.headline;el.subheadlineInput.value=o.subheadline;el.bodyTextInput.value=o.bodyText;
+el.enableHeadline.checked=o.enableHeadline;el.enableSubheadline.checked=o.enableSubheadline;el.enableBodyText.checked=o.enableBodyText;el.enableFeatures.checked=o.enableFeatures;
+}
+function audRenderSkills(){
+const host=document.getElementById("audTextSkills");if(!host)return;host.innerHTML="";
+AUD_TEXT_SKILLS.forEach(([key,label])=>{
+const cfg=state.architecture.textElements[key],card=document.createElement("div");card.className="rounded-xl border border-black/[0.06] dark:border-white/[0.08] p-3 space-y-2";
+const head=document.createElement("div");head.className="flex items-center justify-between";
+const title=document.createElement("label");title.className="text-xs font-semibold";title.textContent=label;
+const toggle=document.createElement("input");toggle.type="checkbox";toggle.checked=cfg.enabled;head.append(title,toggle);
+const value=document.createElement("textarea");value.rows=2;value.value=cfg.value;value.placeholder=label+"...";value.className="w-full text-xs p-2 rounded-lg bg-[#F5F5F7] dark:bg-[#222225]";
+const meta=document.createElement("div");meta.className="grid grid-cols-2 gap-2";
+const placement=document.createElement("input");placement.value=cfg.placement||"";placement.placeholder="Placement";placement.className="text-xs p-2 rounded-lg bg-[#F5F5F7] dark:bg-[#222225]";
+const hierarchy=document.createElement("input");hierarchy.value=cfg.hierarchy||"";hierarchy.placeholder="Hierarchy";hierarchy.className=placement.className;meta.append(placement,hierarchy);card.append(head,value,meta);
+const save=()=>{cfg.enabled=toggle.checked;cfg.value=value.value;cfg.placement=placement.value;cfg.hierarchy=hierarchy.value;audSyncLegacy();audSave();updateTypographyStagePreview();updatePromptAndSummary();};
+[toggle,value,placement,hierarchy].forEach(n=>n.addEventListener(n===value?"input":"change",save));host.appendChild(card);
+});
+}
+function audFillSub(){
+const c=document.getElementById("audCategorySelect"),s=document.getElementById("audSubcategorySelect");if(!c||!s)return;
+s.innerHTML='<option value="">Pilih Subcategory</option>';const cat=AUD_CATEGORIES.find(x=>x.id===c.value);
+(cat?.subcategories||[]).forEach(x=>{const o=document.createElement("option");o.value=x.id;o.textContent=x.name;s.appendChild(o);});s.value=state.architecture.subcategoryId||"";
+}
+function audSwitch(c,s){
+audSave();const a=state.architecture,cat=AUD_CATEGORIES.find(x=>x.id===c),sub=cat?.subcategories?.find(x=>x.id===s),profile=a.userConfigurations[audKey(c,s)]||{};
+const inherited={layout:sub?.layoutConfig||cat?.layoutConfig||{},textElements:sub?.textElementConfig||cat?.textElementConfig||{},visualDirection:sub?.visualDirectionConfig||cat?.visualDirectionConfig||{}};
+a.categoryId=c;a.subcategoryId=s;
+a.layout=audMerge({enabled:true,preset:AUD_LAYOUTS[0],configuration:{}},inherited.layout);a.layout=audMerge(a.layout,profile.layout);
+a.textElements=audMerge(AUD_DEFAULT_TEXT,inherited.textElements);a.textElements=audMerge(a.textElements,profile.textElements);
+const defaults={background:{enabled:true,value:state.variables.background},composition:{enabled:true,value:state.variables.composition},lighting:{enabled:true,value:state.variables.lighting},visualStyle:{enabled:true,value:state.variables.visual},colorMood:{enabled:true,value:AUD_VISUAL[0].defaultValue},negativeConstraints:{enabled:false,value:""}};
+a.visualDirection=audMerge(defaults,inherited.visualDirection);a.visualDirection=audMerge(a.visualDirection,profile.visualDirection);
+state.variables.layout=a.layout.preset;audSyncLegacy();audRenderSkills();const ls=document.getElementById("audLayoutSelect");if(ls)ls.value=a.layout.preset;updatePromptAndSummary();updateTypographyStagePreview();
+}
+function audInject(){
+const p=el.productChips?.closest(".bg-white");
+if(p&&!document.getElementById("audCategoryCard")){const d=document.createElement("div");d.id="audCategoryCard";d.className=p.className+" space-y-3";
+d.innerHTML='<div class="text-xs font-semibold uppercase tracking-wider text-zinc-500">Category & Subcategory</div><div class="grid grid-cols-2 gap-2"><select id="audCategorySelect" class="w-full text-xs p-3 rounded-xl bg-[#F5F5F7] dark:bg-[#222225]"></select><select id="audSubcategorySelect" class="w-full text-xs p-3 rounded-xl bg-[#F5F5F7] dark:bg-[#222225]"></select></div><div class="flex gap-2"><input id="audNewCategory" class="min-w-0 flex-1 text-xs p-2 rounded-lg bg-[#F5F5F7] dark:bg-[#222225]" placeholder="Tambah Category"><button id="audAddCategory" class="text-xs px-3 rounded-lg bg-zinc-900 text-white">Tambah</button><input id="audNewSub" class="min-w-0 flex-1 text-xs p-2 rounded-lg bg-[#F5F5F7] dark:bg-[#222225]" placeholder="Tambah Subcategory"><button id="audAddSub" class="text-xs px-3 rounded-lg bg-zinc-900 text-white">Tambah</button></div>';
+p.parentNode.insertBefore(d,p.nextSibling);}
+const scene=el.variablesContainer?.parentElement;
+if(scene&&!document.getElementById("audLayoutCard")){const d=document.createElement("div");d.id="audLayoutCard";d.className="rounded-2xl border border-black/[0.06] p-3 space-y-2";d.innerHTML='<label class="text-xs font-semibold">Layout Configuration</label><select id="audLayoutSelect" class="w-full text-xs p-3 rounded-xl bg-[#F5F5F7] dark:bg-[#222225]"></select>';scene.insertBefore(d,el.variablesContainer);}
+const typo=el.typoStagePreviewToggle?.closest(".pt-3");
+if(typo&&!document.getElementById("audTextSkillsCard")){typo.classList.add("hidden");const d=document.createElement("div");d.id="audTextSkillsCard";d.className="pt-3 border-t space-y-3";d.innerHTML='<h3 class="text-xs font-semibold uppercase tracking-wider">Text Element Skills</h3><div id="audTextSkills" class="space-y-2"></div>';typo.parentNode.insertBefore(d,typo);}
+const prompt=el.promptTextarea?.parentElement?.parentElement;
+if(prompt&&!document.getElementById("audPromptMode")){const b=document.createElement("span");b.id="audPromptMode";b.className="text-[10px] font-semibold px-2 py-1 rounded-lg bg-blue-500/10 text-blue-600";b.textContent="AUTO MODE";prompt.querySelector(".flex.items-center.justify-between")?.appendChild(b);}
+}
+function audRenderCategory(){
+const c=document.getElementById("audCategorySelect");if(!c)return;c.innerHTML='<option value="">Pilih Category</option>';
+AUD_CATEGORIES.forEach(x=>{const o=document.createElement("option");o.value=x.id;o.textContent=x.name;c.appendChild(o);});c.value=state.architecture.categoryId;audFillSub();
+}
+function audValidate(){
+const a=state.architecture,hasText=Object.values(a.textElements).some(x=>x.enabled&&x.value.trim()),negative=(a.visualDirection.negativeConstraints?.value||"").toLowerCase(),out=[];
+if(hasText&&/no text|without text|no typography|no lettering/.test(negative))out.push({type:"Blocking",message:"Negative Constraints melarang teks, tetapi Text Element masih aktif."});
+if(state.selectedProducts.length>1&&!a.layout.enabled)out.push({type:"Warning",message:"Multiple Product aktif tanpa Layout Configuration."});
+a.conflicts=out;return out;
+}
+function audSubject(){
+const p=state.selectedProducts;if(p.length===1)return "Primary subject: "+p[0]+". Preserve exact product identity, proportions, materials, colors, and recognizable design.";
+return "Multi-subject product composition: "+p.map((x,i)=>x+(i===0?" (primary hero product)":" (supporting product "+i+")")).join("; ")+". Keep each product individually recognizable, correctly proportioned, visually distinct, and never merge product features.";
+}
+function audTextPrompt(){
+const t=Object.entries(state.architecture.textElements).filter(([k,v])=>v.enabled&&v.value.trim());
+return t.length?"Text Element Skills: "+t.map(([k,v])=>k+" ("+v.hierarchy+", "+(v.placement||"appropriate editorial placement")+"): render exact text \""+v.value.trim()+"\"").join("; ")+". Maintain exact spelling and legibility.":"Typography: no text overlay.";
+}
+function audVisualPrompt(){
+const d=state.architecture.visualDirection;return [
+d.background?.enabled&&d.background.value?"Background: "+d.background.value+".":"",
+d.composition?.enabled&&d.composition.value?"Composition: "+d.composition.value+".":"",
+d.lighting?.enabled&&d.lighting.value?"Lighting: "+d.lighting.value+".":"",
+d.visualStyle?.enabled&&d.visualStyle.value?"Visual style: "+d.visualStyle.value+".":"",
+d.colorMood?.enabled&&d.colorMood.value?"Color & mood: "+d.colorMood.value+".":"",
+d.negativeConstraints?.enabled&&d.negativeConstraints.value?"Negative constraints: "+d.negativeConstraints.value+".":""
+].filter(Boolean).join(" ");
+}
+function buildCompiledPrompt(){
+const count=state.selectedProducts.length,automatic=count===1?"Single Hero Product":count===2?"Dual Product Composition":"Multi Product Composition",a=state.architecture,v=state.variables;
+const layout=a.layout.enabled?(a.layout.preset||automatic):automatic;
+const parts=[audSubject(),"Layout framing: "+layout+". Arrange "+count+" selected product"+(count===1?"":"s")+" with clear hierarchy and balanced spacing.",audTextPrompt(),audVisualPrompt(),state.logoOverlay?"Brand placement: leave clear breathing room at "+state.logoPosition.replace("-"," ")+" for brand logo placement.":"",v.quality?"Rendering quality: "+v.quality+".":"","Aspect ratio: "+state.ratio+"."].filter(Boolean);
+a.lastCompiledSections=parts;audValidate();return parts.join(" ");
+}
+const audUpdateBase=updatePromptAndSummary;
+updatePromptAndSummary=function(){audUpdateBase();const n=document.getElementById("audPromptMode");if(n){n.textContent=state.manualPromptOverride?"MANUAL MODE":"AUTO MODE";n.className="text-[10px] font-semibold px-2 py-1 rounded-lg "+(state.manualPromptOverride?"bg-amber-500/10 text-amber-600":"bg-blue-500/10 text-blue-600");}};
+const audResetBase=resetDefaults;
+resetDefaults=function(){audResetBase();const a=state.architecture;a.textElements=JSON.parse(JSON.stringify(AUD_DEFAULT_TEXT));a.layout={enabled:true,preset:AUD_LAYOUTS[0],configuration:{}};a.visualDirection={background:{enabled:true,value:state.variables.background},composition:{enabled:true,value:state.variables.composition},lighting:{enabled:true,value:state.variables.lighting},visualStyle:{enabled:true,value:state.variables.visual},colorMood:{enabled:true,value:AUD_VISUAL[0].defaultValue},negativeConstraints:{enabled:false,value:""}};audRenderSkills();audSave();updatePromptAndSummary();};
+audLoad();
+window.addEventListener("DOMContentLoaded",()=>{
+audInject();audRenderCategory();audRenderSkills();
+const ls=document.getElementById("audLayoutSelect");if(ls){ls.innerHTML=AUD_LAYOUTS.map(x=>'<option value="'+x.replace(/"/g,"&quot;")+'">'+x+'</option>').join("");ls.value=state.architecture.layout.preset;}
+const c=document.getElementById("audCategorySelect"),s=document.getElementById("audSubcategorySelect");
+c?.addEventListener("change",()=>{const cat=AUD_CATEGORIES.find(x=>x.id===c.value);if(cat?.subcategories?.length){audFillSub();audSwitch(c.value,cat.subcategories[0].id);s.value=cat.subcategories[0].id;}});
+s?.addEventListener("change",()=>{if(c.value&&s.value)audSwitch(c.value,s.value);});
+document.getElementById("audAddCategory")?.addEventListener("click",()=>{const i=document.getElementById("audNewCategory"),name=i.value.trim(),id=name.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");if(!name||AUD_CATEGORIES.some(x=>x.id===id))return;AUD_CATEGORIES.push({id,name,subcategories:[]});i.value="";audRenderCategory();audSave();});
+document.getElementById("audAddSub")?.addEventListener("click",()=>{const i=document.getElementById("audNewSub"),name=i.value.trim(),cat=AUD_CATEGORIES.find(x=>x.id===c.value),id=name.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");if(!name||!cat||cat.subcategories.some(x=>x.id===id))return;cat.subcategories.push({id,name});i.value="";audRenderCategory();s.value=id;audSwitch(cat.id,id);audSave();});
+ls?.addEventListener("change",e=>{state.architecture.layout.preset=e.target.value;state.variables.layout=e.target.value;audSave();updatePromptAndSummary();});
+el.btnGenerate?.addEventListener("click",e=>{const conflict=audValidate().find(x=>x.type==="Blocking");if(conflict){e.preventDefault();e.stopImmediatePropagation();showToast(conflict.message,"error");}},true);
+audSyncLegacy();renderVariables();updatePromptAndSummary();
+});
+</script>
+
 </body>
 </html>

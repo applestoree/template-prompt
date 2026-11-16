@@ -5,7 +5,7 @@ Template dasar untuk menyusun prompt visual produk Apple secara terstruktur.
 ## Prompt Variables
 
 ```text
-[subject]:
+[products]:
 
 [action]:
 
@@ -30,7 +30,7 @@ Template dasar untuk menyusun prompt visual produk Apple secara terstruktur.
 
 | Variable | Fungsi |
 |---|---|
-| `[subject]` | **Nama produk Apple yang menjadi subjek utama visual.** Isi dengan nama produk/model, misalnya `iPhone 17 Pro Max`, `iPad Pro 13-inch (M5)`, atau `MacBook Air 15-inch (M4)`. Variable ini hanya berisi nama produk, bukan deskripsi visual atau instruksi gambar. |
+| `[products]` | **Nama produk Apple yang menjadi subjek utama visual.** Isi dengan nama produk/model, misalnya `iPhone 17 Pro Max`, `iPad Pro 13-inch (M5)`, atau `MacBook Air 15-inch (M4)`. Variable ini hanya berisi nama produk, bukan deskripsi visual atau instruksi gambar. |
 | `[action]` | Menentukan aktivitas, posisi, atau interaksi produk dengan lingkungan atau elemen pendukung. |
 | `[background]` | Menentukan latar tempat, lingkungan, dan elemen pendukung. |
 | `[composition]` | Mengatur framing, sudut pandang, perspektif, dan penempatan produk. |
@@ -41,16 +41,16 @@ Template dasar untuk menyusun prompt visual produk Apple secara terstruktur.
 | `[quality]` | Menentukan detail, ketajaman, kualitas render, dan standar hasil akhir. |
 | `[ratio]` | Menentukan rasio aspek atau format keluaran gambar. |
 
-## Subject Rules
+## Products Rules
 
-- `[subject]` hanya berisi nama produk Apple.
+- `[products]` hanya berisi nama produk Apple.
 - Gunakan nama model yang spesifik jika tersedia.
-- Jangan memasukkan deskripsi bentuk, warna, material, posisi, aksi, atau gaya visual ke dalam `[subject]`.
-- Detail visual produk dan instruksi penampilannya ditentukan melalui variable lain atau instruksi Prompt Engine, bukan dengan memperluas isi `[subject]`.
+- Jangan memasukkan deskripsi bentuk, warna, material, posisi, aksi, atau gaya visual ke dalam `[products]`.
+- Detail visual produk dan instruksi penampilannya ditentukan melalui variable lain atau instruksi Prompt Engine, bukan dengan memperluas isi `[products]`.
 
 ## Usage
 
-1. Isi `[subject]` dengan nama produk Apple yang akan ditampilkan.
+1. Isi `[products]` dengan nama produk Apple yang akan ditampilkan.
 2. Isi variable lainnya sesuai kebutuhan visual.
 3. Pertahankan nama variable agar konsisten saat digunakan oleh Prompt Engine.
 4. Hapus atau kosongkan variable yang tidak relevan untuk kebutuhan tertentu.

@@ -30,8 +30,8 @@ Template dasar untuk menyusun prompt visual produk Apple secara terstruktur.
 
 | Variable | Fungsi |
 |---|---|
-| `[subject]` | **Wajib menampilkan produk Apple sebagai subjek utama.** Sebutkan nama produk dan model secara spesifik, misalnya iPhone, iPad, Mac, Apple Watch, atau AirPods. Pertahankan identitas desain, bentuk, warna, material, dan detail produk sesuai model yang disebutkan. Jangan mengganti produk dengan perangkat generik atau merek lain. |
-| `[action]` | Menentukan aktivitas, posisi, atau interaksi produk Apple dengan lingkungan atau elemen pendukung. |
+| `[subject]` | **Nama produk Apple yang menjadi subjek utama visual.** Isi dengan nama produk/model, misalnya `iPhone 17 Pro Max`, `iPad Pro 13-inch (M5)`, atau `MacBook Air 15-inch (M4)`. Variable ini hanya berisi nama produk, bukan deskripsi visual atau instruksi gambar. |
+| `[action]` | Menentukan aktivitas, posisi, atau interaksi produk dengan lingkungan atau elemen pendukung. |
 | `[background]` | Menentukan latar tempat, lingkungan, dan elemen pendukung. |
 | `[composition]` | Mengatur framing, sudut pandang, perspektif, dan penempatan produk. |
 | `[layout]` | Mengatur susunan elemen visual dan ruang kosong dalam desain. |
@@ -43,16 +43,15 @@ Template dasar untuk menyusun prompt visual produk Apple secara terstruktur.
 
 ## Subject Rules
 
-- Subjek utama harus berupa produk Apple.
-- Gunakan nama produk dan model yang spesifik jika informasinya tersedia.
-- Produk Apple harus menjadi fokus visual utama dan mudah dikenali.
-- Jaga akurasi desain produk; jangan menambahkan fitur, bentuk, kamera, port, tombol, atau detail yang tidak sesuai dengan model.
-- Jangan menampilkan logo atau identitas merek lain sebagai pengganti Apple.
+- `[subject]` hanya berisi nama produk Apple.
+- Gunakan nama model yang spesifik jika tersedia.
+- Jangan memasukkan deskripsi bentuk, warna, material, posisi, aksi, atau gaya visual ke dalam `[subject]`.
+- Detail visual produk dan instruksi penampilannya ditentukan melalui variable lain atau instruksi Prompt Engine, bukan dengan memperluas isi `[subject]`.
 
 ## Usage
 
-1. Isi setiap variable sesuai kebutuhan konten.
-2. Pastikan `[subject]` menyebutkan produk Apple yang akan ditampilkan.
+1. Isi `[subject]` dengan nama produk Apple yang akan ditampilkan.
+2. Isi variable lainnya sesuai kebutuhan visual.
 3. Pertahankan nama variable agar konsisten saat digunakan oleh Prompt Engine.
 4. Hapus atau kosongkan variable yang tidak relevan untuk kebutuhan tertentu.
 5. Gabungkan seluruh instruksi menjadi satu prompt final sebelum dikirim ke Image Generator.

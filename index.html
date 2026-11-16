@@ -2008,8 +2008,8 @@ const c=document.getElementById("audCategorySelect"),s=document.getElementById("
 s.innerHTML='<option value="">Pilih Subcategory</option>';const cat=AUD_CATEGORIES.find(x=>x.id===c.value);
 (cat?.subcategories||[]).forEach(x=>{const o=document.createElement("option");o.value=x.id;o.textContent=x.name;s.appendChild(o);});s.value=state.architecture.subcategoryId||"";
 }
-function audSwitch(c,s){
-audSave();const a=state.architecture,cat=AUD_CATEGORIES.find(x=>x.id===c),sub=cat?.subcategories?.find(x=>x.id===s),profile=a.userConfigurations[audKey(c,s)]||{};
+function audSwitch(c,s,skipSave=false){
+if(!skipSave)audSave();const a=state.architecture,cat=AUD_CATEGORIES.find(x=>x.id===c),sub=cat?.subcategories?.find(x=>x.id===s),profile=a.userConfigurations[audKey(c,s)]||{};
 const inherited={layout:sub?.layoutConfig||cat?.layoutConfig||{},textElements:sub?.textElementConfig||cat?.textElementConfig||{},visualDirection:sub?.visualDirectionConfig||cat?.visualDirectionConfig||{}};
 a.categoryId=c;a.subcategoryId=s;
 a.layout=audMerge({enabled:true,preset:AUD_LAYOUTS[0],configuration:{}},inherited.layout);a.layout=audMerge(a.layout,profile.layout);
@@ -2096,6 +2096,7 @@ document.getElementById("audAddCategory")?.addEventListener("click",()=>{const i
 document.getElementById("audAddSub")?.addEventListener("click",()=>{const i=document.getElementById("audNewSub"),name=i.value.trim(),cat=AUD_CATEGORIES.find(x=>x.id===c.value),id=name.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");if(!name||!cat||cat.subcategories.some(x=>x.id===id))return;cat.subcategories.push({id,name});i.value="";audRenderCategory();s.value=id;audSwitch(cat.id,id);audSave();});
 ls?.addEventListener("change",e=>{state.architecture.layout.preset=e.target.value;state.variables.layout=e.target.value;audSave();updatePromptAndSummary();});
 el.btnGenerate?.addEventListener("click",e=>{const conflict=audValidate().find(x=>x.type==="Blocking");if(conflict){e.preventDefault();e.stopImmediatePropagation();showToast(conflict.message,"error");}},true);
+audSwitch(state.architecture.categoryId,state.architecture.subcategoryId,true);
 audSyncLegacy();renderVariables();updatePromptAndSummary();
 });
 </script>

@@ -2016,7 +2016,10 @@ a.layout=audMerge({enabled:true,preset:AUD_LAYOUTS[0],configuration:{}},inherite
 a.textElements=audMerge(AUD_DEFAULT_TEXT,inherited.textElements);a.textElements=audMerge(a.textElements,profile.textElements);
 const defaults={background:{enabled:true,value:state.variables.background},composition:{enabled:true,value:state.variables.composition},lighting:{enabled:true,value:state.variables.lighting},visualStyle:{enabled:true,value:state.variables.visual},colorMood:{enabled:true,value:AUD_VISUAL[0].defaultValue},negativeConstraints:{enabled:false,value:""}};
 a.visualDirection=audMerge(defaults,inherited.visualDirection);a.visualDirection=audMerge(a.visualDirection,profile.visualDirection);
-state.variables.layout=a.layout.preset;audSyncLegacy();audRenderSkills();const ls=document.getElementById("audLayoutSelect");if(ls)ls.value=a.layout.preset;updatePromptAndSummary();updateTypographyStagePreview();
+state.variables.background=a.visualDirection.background.value;state.variables.composition=a.visualDirection.composition.value;
+state.variables.lighting=a.visualDirection.lighting.value;state.variables.visual=a.visualDirection.visualStyle.value;
+state.variables.colorMood=a.visualDirection.colorMood.value;state.variables.negativeConstraints=a.visualDirection.negativeConstraints.value;
+state.variables.layout=a.layout.preset;audSyncLegacy();audRenderSkills();renderVariables();const ls=document.getElementById("audLayoutSelect");if(ls)ls.value=a.layout.preset;updatePromptAndSummary();updateTypographyStagePreview();
 }
 function audInject(){
 const p=el.productChips?.closest(".bg-white");

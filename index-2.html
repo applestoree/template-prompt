@@ -1,0 +1,1944 @@
+<!DOCTYPE html>
+<html lang="id" class="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Studio AI — Product Image Generator</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+          },
+          boxShadow: {
+            'apple': '0 4px 24px -1px rgba(0, 0, 0, 0.06), 0 2px 8px -1px rgba(0, 0, 0, 0.04)',
+            'apple-dark': '0 8px 32px -4px rgba(0, 0, 0, 0.5)',
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    /* Custom subtle scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(156, 163, 175, 0.35);
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(156, 163, 175, 0.55);
+    }
+    /* Shimmer animation for image loading */
+    @keyframes shimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+    .shimmer-bg {
+      background: linear-gradient(90deg, rgba(160,160,170,0.08) 25%, rgba(160,160,170,0.22) 50%, rgba(160,160,170,0.08) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.8s infinite linear;
+    }
+  </style>
+</head>
+<body class="bg-[#F5F5F7] dark:bg-[#0B0B0D] text-[#1D1D1F] dark:text-[#F5F5F7] transition-colors duration-300 min-h-screen flex flex-col">
+
+  <!-- Top Navigation Bar -->
+  <header class="sticky top-0 z-30 backdrop-blur-xl bg-white/75 dark:bg-[#161618]/80 border-b border-black/[0.06] dark:border-white/[0.08]">
+    <div class="max-w-[1440px] mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-2xl bg-gradient-to-br from-zinc-800 to-black dark:from-white dark:to-zinc-300 flex items-center justify-center shadow-sm">
+          <svg class="w-5 h-5 text-white dark:text-black" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="18" height="18" rx="4" />
+            <circle cx="8.5" cy="8.5" r="1.5" fill="currentColor" />
+            <path d="M21 15l-5-5L5 21" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="font-semibold text-base sm:text-lg tracking-tight">Studio AI</h1>
+            <span class="text-[11px] font-medium px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">Gemini Flash Image</span>
+          </div>
+          <p class="text-xs text-zinc-500 dark:text-zinc-400 hidden sm:block">Parametric Product Campaign Generator</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button id="btnRandomize" type="button" class="px-3 py-2 rounded-xl text-xs font-medium bg-black/[0.04] hover:bg-black/[0.08] dark:bg-white/[0.07] dark:hover:bg-white/[0.12] transition flex items-center gap-1.5" title="Acak Preset">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span class="hidden md:inline">Randomize</span>
+        </button>
+        <button id="btnReset" type="button" class="px-3 py-2 rounded-xl text-xs font-medium bg-black/[0.04] hover:bg-black/[0.08] dark:bg-white/[0.07] dark:hover:bg-white/[0.12] transition flex items-center gap-1.5" title="Reset Default">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M3 3v5h5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span class="hidden md:inline">Reset</span>
+        </button>
+        <button id="btnTheme" type="button" class="p-2 rounded-xl bg-black/[0.04] hover:bg-black/[0.08] dark:bg-white/[0.07] dark:hover:bg-white/[0.12] transition" aria-label="Toggle Theme">
+          <svg id="iconSun" class="w-4 h-4 hidden dark:block text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+          </svg>
+          <svg id="iconMoon" class="w-4 h-4 block dark:hidden text-zinc-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Toast / Status Banner -->
+  <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- Main 2-Column Workspace -->
+  <main class="flex-1 max-w-[1440px] w-full mx-auto px-4 sm:px-6 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+    <!-- LEFT COLUMN: Variables Control Panel -->
+    <section class="lg:col-span-5 xl:col-span-5 space-y-4">
+
+      <!-- 1. Brand Logo Card -->
+      <div class="bg-white dark:bg-[#161618] rounded-3xl p-5 shadow-apple dark:shadow-apple-dark border border-black/[0.05] dark:border-white/[0.07]">
+        <div class="flex items-center justify-between mb-3">
+          <label class="text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+            Logo Brand
+          </label>
+          <label class="inline-flex items-center gap-2 cursor-pointer select-none">
+            <input type="checkbox" id="logoOverlayToggle" checked class="sr-only peer" />
+            <div class="w-9 h-5 bg-zinc-200 dark:bg-zinc-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all relative peer-checked:bg-blue-600"></div>
+            <span class="text-xs font-medium text-zinc-600 dark:text-zinc-300">Overlay Logo</span>
+          </label>
+        </div>
+
+        <div class="flex items-center gap-3.5">
+          <!-- Live Logo Preview Box -->
+          <div class="w-16 h-16 rounded-2xl bg-[#F5F5F7] dark:bg-[#222225] border border-black/[0.06] dark:border-white/[0.08] flex items-center justify-center p-2.5 shrink-0 relative overflow-hidden">
+            <img id="logoThumb" src="https://jhpbtooefyzdndstlzva.supabase.co/storage/v1/object/public/apple/logo.png" alt="Logo Preview" class="max-w-full max-h-full object-contain transition-all" />
+          </div>
+
+          <div class="flex-1 min-w-0 space-y-2">
+            <div class="flex gap-1.5">
+              <input id="logoUrlInput" type="url" value="https://jhpbtooefyzdndstlzva.supabase.co/storage/v1/object/public/apple/logo.png" placeholder="URL Logo PNG/SVG..." class="w-full text-xs px-3 py-2 rounded-xl bg-[#F5F5F7] dark:bg-[#222225] border border-transparent focus:border-blue-500 focus:bg-white dark:focus:bg-[#1C1C1E] outline-none transition truncate" />
+              <label for="logoFileUpload" class="px-3 py-2 rounded-xl bg-black/[0.05] hover:bg-black/[0.1] dark:bg-white/[0.08] dark:hover:bg-white/[0.14] text-xs font-medium cursor-pointer shrink-0 transition flex items-center" title="Upload Logo Lokal">
+                Upload
+              </label>
+              <input id="logoFileUpload" type="file" accept="image/*" class="hidden" />
+            </div>
+
+            <!-- Logo Overlay Controls -->
+            <div id="logoOptionsRow" class="space-y-1.5">
+              <div class="flex flex-wrap items-center gap-1.5">
+                <select id="logoPositionSelect" class="text-[11px] px-2.5 py-1.5 rounded-lg bg-[#F5F5F7] dark:bg-[#222225] border border-black/[0.05] dark:border-white/[0.08] outline-none">
+                  <option value="top-center">Posisi: Top Center</option>
+                  <option value="top-left">Posisi: Top Left</option>
+                  <option value="top-right">Posisi: Top Right</option>
+                  <option value="bottom-left">Posisi: Bottom Left</option>
+                  <option value="bottom-right">Posisi: Bottom Right</option>
+                  <option value="bottom-center">Posisi: Bottom Center</option>
+                </select>
+                <select id="logoToneSelect" class="text-[11px] px-2.5 py-1.5 rounded-lg bg-[#F5F5F7] dark:bg-[#222225] border border-black/[0.05] dark:border-white/[0.08] outline-none">
+                  <option value="auto" selected>Warna: Auto Contrast (Smart)</option>
+                  <option value="original">Warna: Original</option>
+                  <option value="white">Warna: White (#FFF)</option>
+                  <option value="black">Warna: Black (#111)</option>
+                </select>
+              </div>
+              <!-- Real-time Contrast Detection Badge -->
+              <div id="contrastStatusBadge" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-medium bg-zinc-100 dark:bg-zinc-800/90 text-zinc-700 dark:text-zinc-300 border border-black/[0.05] dark:border-white/[0.08]">
+                <span id="contrastStatusDot" class="w-2 h-2 rounded-full bg-zinc-900 dark:bg-white"></span>
+                <span id="contrastStatusText">Auto-detected: Light BG → Dark Logo</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Products Selector & Custom Input -->
+      <div class="bg-white dark:bg-[#161618] rounded-3xl p-5 shadow-apple dark:shadow-apple-dark border border-black/[0.05] dark:border-white/[0.07] space-y-3">
+        <div class="flex items-center justify-between">
+          <label class="text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+            Products <span class="text-zinc-400 font-normal normal-case">(Multi-select / Custom)</span>
+          </label>
+          <span id="productCountBadge" class="text-[11px] font-medium px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300">2 dipilih</span>
+        </div>
+
+        <!-- Quick Select Chips -->
+        <div id="productChips" class="flex flex-wrap gap-1.5"></div>
+
+        <!-- Custom Product Input -->
+        <div class="flex gap-2">
+          <input id="customProductInput" type="text" placeholder="Tambah produk kustom (mis. MacBook Pro M4)..." class="flex-1 text-xs px-3.5 py-2.5 rounded-xl bg-[#F5F5F7] dark:bg-[#222225] border border-transparent focus:border-blue-500 focus:bg-white dark:focus:bg-[#1C1C1E] outline-none transition" />
+          <button id="btnAddProduct" type="button" class="px-3.5 py-2.5 rounded-xl bg-zinc-900 dark:bg-white text-white dark:text-black text-xs font-medium hover:opacity-90 transition shrink-0">
+            + Tambah
+          </button>
+        </div>
+      </div>
+
+      <!-- 3. Scene & Art Direction Variables -->
+      <div class="bg-white dark:bg-[#161618] rounded-3xl p-5 shadow-apple dark:shadow-apple-dark border border-black/[0.05] dark:border-white/[0.07] space-y-4">
+        <h2 class="text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Scene & Art Direction</h2>
+
+        <!-- Dynamic Variable Fields Container -->
+        <div id="variablesContainer" class="space-y-4"></div>
+
+        <!-- Structured Typography Hierarchy Section -->
+        <div class="pt-3 border-t border-black/[0.06] dark:border-white/[0.08] space-y-3">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
+              <h3 class="text-xs font-semibold uppercase tracking-wider text-zinc-700 dark:text-zinc-200">Typography Content</h3>
+            </div>
+            <label class="inline-flex items-center gap-2 cursor-pointer select-none">
+              <input type="checkbox" id="typoStagePreviewToggle" checked class="sr-only peer" />
+              <div class="w-8 h-4 bg-zinc-200 dark:bg-zinc-700 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all relative peer-checked:bg-indigo-600"></div>
+              <span class="text-[11px] font-medium text-zinc-500 dark:text-zinc-400">Live Guide</span>
+            </label>
+          </div>
+
+          <!-- Typography Placement & Contrast Control -->
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label for="typoPlacementSelect" class="block text-[11px] font-medium text-zinc-500 dark:text-zinc-400 mb-1">Text Placement</label>
+              <select id="typoPlacementSelect" class="w-full text-[11px] px-2.5 py-2 rounded-xl bg-[#F5F5F7] dark:bg-[#222225] border border-black/[0.05] dark:border-white/[0.08] outline-none">
+                <option value="top-editorial">Top Editorial Block</option>
+                <option value="bottom-editorial" selected>Bottom Editorial Block</option>
+                <option value="split-top-bottom">Split (Title Top, Specs Bottom)</option>
+                <option value="left-aligned">Left Aligned Margin</option>
+              </select>
+            </div>
+            <div>
+              <label for="typoContrastSelect" class="block text-[11px] font-medium text-zinc-500 dark:text-zinc-400 mb-1">Text Contrast Mode</label>
+              <select id="typoContrastSelect" class="w-full text-[11px] px-2.5 py-2 rounded-xl bg-[#F5F5F7] dark:bg-[#222225] border border-black/[0.05] dark:border-white/[0.08] outline-none">
+                <option value="auto" selected>Auto Contrast (Smart)</option>
+                <option value="light-text">High-Contrast White Text</option>
+                <option value="dark-text">High-Contrast Obsidian Text</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- 1. Headline Field -->
+          <div class="p-3 rounded-2xl bg-[#F5F5F7]/80 dark:bg-[#1E1E21] border border-black/[0.04] dark:border-white/[0.06] space-y-2">
+            <div class="flex items-center justify-between">
+              <label for="headlineInput" class="text-xs font-semibold text-zinc-800 dark:text-zinc-200 flex items-center gap-1.5">
+                Headline
+                <span class="text-[10px] font-normal px-1.5 py-0.5 rounded bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">Primary</span>
+              </label>
+              <input type="checkbox" id="enableHeadline" checked class="w-3.5 h-3.5 rounded accent-blue-600 cursor-pointer" title="Aktifkan Headline" />
+            </div>
+            <div id="headlinePresets" class="flex flex-wrap gap-1"></div>
+            <input id="headlineInput" type="text" value="iPhone 17 Pro. Titanium Redefined." placeholder="Masukkan Headline utama..." class="w-full text-xs px-3 py-2 rounded-xl bg-white dark:bg-[#141416] border border-black/[0.06] dark:border-white/[0.08] focus:border-blue-500 outline-none transition" />
+          </div>
+
+          <!-- 2. Subheadline Field -->
+          <div class="p-3 rounded-2xl bg-[#F5F5F7]/80 dark:bg-[#1E1E21] border border-black/[0.04] dark:border-white/[0.06] space-y-2">
+            <div class="flex items-center justify-between">
+              <label for="subheadlineInput" class="text-xs font-semibold text-zinc-800 dark:text-zinc-200 flex items-center gap-1.5">
+                Subheadline
+                <span class="text-[10px] font-normal px-1.5 py-0.5 rounded bg-zinc-500/10 text-zinc-600 dark:text-zinc-400">Secondary</span>
+              </label>
+              <input type="checkbox" id="enableSubheadline" checked class="w-3.5 h-3.5 rounded accent-blue-600 cursor-pointer" title="Aktifkan Subheadline" />
+            </div>
+            <div id="subheadlinePresets" class="flex flex-wrap gap-1"></div>
+            <input id="subheadlineInput" type="text" value="A19 Pro chip. Pro camera system. All-day battery." placeholder="Masukkan Subheadline pendukung..." class="w-full text-xs px-3 py-2 rounded-xl bg-white dark:bg-[#141416] border border-black/[0.06] dark:border-white/[0.08] focus:border-blue-500 outline-none transition" />
+          </div>
+
+          <!-- 3. Body Text Field -->
+          <div class="p-3 rounded-2xl bg-[#F5F5F7]/80 dark:bg-[#1E1E21] border border-black/[0.04] dark:border-white/[0.06] space-y-2">
+            <div class="flex items-center justify-between">
+              <label for="bodyTextInput" class="text-xs font-semibold text-zinc-800 dark:text-zinc-200 flex items-center gap-1.5">
+                Body Text
+                <span class="text-[10px] font-normal px-1.5 py-0.5 rounded bg-zinc-500/10 text-zinc-600 dark:text-zinc-400">Copy</span>
+              </label>
+              <input type="checkbox" id="enableBodyText" checked class="w-3.5 h-3.5 rounded accent-blue-600 cursor-pointer" title="Aktifkan Body Text" />
+            </div>
+            <div id="bodyTextPresets" class="flex flex-wrap gap-1"></div>
+            <textarea id="bodyTextInput" rows="2" placeholder="Masukkan deskripsi singkat produk..." class="w-full text-xs px-3 py-2 rounded-xl bg-white dark:bg-[#141416] border border-black/[0.06] dark:border-white/[0.08] focus:border-blue-500 outline-none transition resize-none">Engineered from aerospace-grade titanium with an ultra-bright ProMotion display and precision-crafted Apple Watch Series 10.</textarea>
+          </div>
+
+          <!-- 4. Feature Callouts / Badges Field -->
+          <div class="p-3 rounded-2xl bg-[#F5F5F7]/80 dark:bg-[#1E1E21] border border-black/[0.04] dark:border-white/[0.06] space-y-2">
+            <div class="flex items-center justify-between">
+              <label for="featureInput" class="text-xs font-semibold text-zinc-800 dark:text-zinc-200 flex items-center gap-1.5">
+                Feature Callouts
+                <span class="text-[10px] font-normal px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">Badges</span>
+              </label>
+              <input type="checkbox" id="enableFeatures" checked class="w-3.5 h-3.5 rounded accent-blue-600 cursor-pointer" title="Aktifkan Feature Badges" />
+            </div>
+            <!-- Active Feature Chips -->
+            <div id="featureChipsContainer" class="flex flex-wrap gap-1.5"></div>
+            <!-- Quick Preset Feature Suggestions -->
+            <div id="featurePresets" class="flex flex-wrap gap-1 pt-0.5"></div>
+            <!-- Add Custom Feature Input -->
+            <div class="flex gap-1.5">
+              <input id="featureInput" type="text" placeholder="Tambah fitur (mis. 48MP Fusion Camera)..." class="flex-1 text-xs px-3 py-1.5 rounded-xl bg-white dark:bg-[#141416] border border-black/[0.06] dark:border-white/[0.08] focus:border-blue-500 outline-none transition" />
+              <button id="btnAddFeature" type="button" class="px-3 py-1.5 rounded-xl bg-zinc-900 dark:bg-white text-white dark:text-black text-[11px] font-medium hover:opacity-90 transition shrink-0">
+                + Add
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. Aspect Ratio & Quality -->
+      <div class="bg-white dark:bg-[#161618] rounded-3xl p-5 shadow-apple dark:shadow-apple-dark border border-black/[0.05] dark:border-white/[0.07] space-y-4">
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 mb-2.5">
+            Aspect Ratio
+          </label>
+          <div id="ratioPills" class="grid grid-cols-3 sm:grid-cols-5 gap-2"></div>
+        </div>
+      </div>
+
+      <!-- 5. Live Compiled Prompt Preview -->
+      <div class="bg-white dark:bg-[#161618] rounded-3xl p-5 shadow-apple dark:shadow-apple-dark border border-black/[0.05] dark:border-white/[0.07] space-y-2.5">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Compiled AI Prompt</span>
+          <div class="flex items-center gap-2">
+            <button id="btnSyncPrompt" type="button" class="text-[11px] font-medium text-blue-600 dark:text-blue-400 hover:underline hidden">Reset ke Auto-Sync</button>
+            <button id="btnCopyPrompt" type="button" class="text-[11px] font-medium px-2.5 py-1 rounded-lg bg-black/[0.05] dark:bg-white/[0.08] hover:bg-black/[0.1] transition">Copy</button>
+          </div>
+        </div>
+        <textarea id="promptTextarea" rows="4" class="w-full text-xs leading-relaxed p-3 rounded-2xl bg-[#F5F5F7] dark:bg-[#222225] text-zinc-700 dark:text-zinc-200 border border-transparent focus:border-blue-500 outline-none resize-y"></textarea>
+      </div>
+
+      <!-- Primary Generate CTA -->
+      <button id="btnGenerate" type="button" class="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-[#0071E3] to-[#005BB5] hover:from-[#0077ED] hover:to-[#0062C4] active:scale-[0.99] text-white font-semibold text-sm shadow-lg shadow-blue-500/25 transition-all flex items-center justify-center gap-2.5 cursor-pointer">
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" stroke-linecap="round"/>
+        </svg>
+        <span id="btnGenerateText">Generate Product Image (4:5)</span>
+      </button>
+
+    </section>
+
+    <!-- RIGHT COLUMN: Preview Stage & History Gallery -->
+    <section class="lg:col-span-7 xl:col-span-7 lg:sticky lg:top-22 space-y-5">
+
+      <!-- Main Preview Card -->
+      <div class="bg-white dark:bg-[#161618] rounded-3xl p-4 sm:p-6 shadow-apple dark:shadow-apple-dark border border-black/[0.05] dark:border-white/[0.07]">
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Preview Stage</span>
+            <span id="stageRatioBadge" class="text-[11px] font-medium px-2.5 py-0.5 rounded-full bg-black/[0.05] dark:bg-white/[0.08]">4:5 Portrait</span>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button id="btnDownload" type="button" disabled class="px-4 py-2 rounded-xl text-xs font-semibold bg-zinc-900 dark:bg-white text-white dark:text-black disabled:opacity-35 disabled:cursor-not-allowed hover:opacity-90 transition flex items-center gap-1.5">
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Download PNG
+            </button>
+          </div>
+        </div>
+
+        <!-- Aspect-Ratio Stage Wrapper -->
+        <div class="w-full flex items-center justify-center bg-[#F5F5F7] dark:bg-[#0E0E10] rounded-2xl p-4 sm:p-6 min-h-[420px] sm:min-h-[540px] border border-black/[0.04] dark:border-white/[0.05]">
+          <div id="previewFrame" class="relative w-full max-w-[440px] aspect-[4/5] rounded-2xl overflow-hidden shadow-2xl bg-zinc-200/70 dark:bg-zinc-900 flex items-center justify-center transition-all duration-300">
+
+            <!-- Empty Initial State -->
+            <div id="emptyState" class="text-center p-6 max-w-xs space-y-3">
+              <div class="w-14 h-14 rounded-2xl bg-white dark:bg-zinc-800 shadow-sm mx-auto flex items-center justify-center text-zinc-400">
+                <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+                  <rect x="3" y="3" width="18" height="18" rx="4"/>
+                  <circle cx="8.5" cy="8.5" r="1.5"/>
+                  <path d="M21 15l-5-5L5 21"/>
+                </svg>
+              </div>
+              <h3 class="text-sm font-semibold text-zinc-800 dark:text-zinc-200">Siap Membuat Visual Produk</h3>
+              <p class="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
+                Sesuaikan variabel produk, latar belakang, dan pencahayaan di panel kiri, lalu klik <strong class="text-zinc-700 dark:text-zinc-300">Generate Product Image</strong>.
+              </p>
+            </div>
+
+            <!-- Loading Shimmer Overlay -->
+            <div id="loadingOverlay" class="hidden absolute inset-0 z-20 shimmer-bg backdrop-blur-md bg-white/60 dark:bg-black/60 flex flex-col items-center justify-center p-6 text-center">
+              <div class="w-11 h-11 rounded-full border-[3px] border-blue-500/30 border-t-blue-500 animate-spin mb-3"></div>
+              <p class="text-sm font-semibold text-zinc-800 dark:text-zinc-100">Merender Visual Produk...</p>
+              <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-1">Gemini AI sedang menyusun pencahayaan & komposisi</p>
+            </div>
+
+            <!-- Generated Image -->
+            <img id="generatedImg" src="" alt="Generated Product Visual" class="hidden w-full h-full object-cover" />
+
+            <!-- Live Logo Overlay on Preview Stage -->
+            <div id="stageLogoOverlay" class="pointer-events-none absolute z-10 transition-all duration-300 top-6 left-1/2 -translate-x-1/2">
+              <img id="stageLogoImg" src="https://jhpbtooefyzdndstlzva.supabase.co/storage/v1/object/public/apple/logo.png" alt="Brand Logo" crossorigin="anonymous" class="h-7 sm:h-8 w-auto object-contain drop-shadow-sm transition-all" />
+            </div>
+
+            <!-- Live Typography Hierarchy Guide Overlay (Visible on empty stage or when Live Guide toggled) -->
+            <div id="stageTypoOverlay" class="pointer-events-none absolute inset-x-5 z-10 transition-all duration-300 bottom-5 flex flex-col gap-1.5">
+              <div id="stageTypoHeaderGroup" class="space-y-1">
+                <h4 id="stageHeadlineText" class="text-base sm:text-lg font-bold tracking-tight leading-tight">iPhone 17 Pro. Titanium Redefined.</h4>
+                <p id="stageSubheadlineText" class="text-xs font-medium opacity-90 leading-snug">A19 Pro chip. Pro camera system. All-day battery.</p>
+                <p id="stageBodyText" class="text-[10px] opacity-75 leading-relaxed line-clamp-2">Engineered from aerospace-grade titanium with an ultra-bright ProMotion display and precision-crafted Apple Watch Series 10.</p>
+              </div>
+              <div id="stageFeaturesRow" class="flex flex-wrap gap-1 pt-1"></div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Quick Variable Summary Pills under Stage -->
+        <div id="activeSummaryPills" class="mt-4 flex flex-wrap gap-1.5"></div>
+      </div>
+
+      <!-- Generation History Gallery -->
+      <div class="bg-white dark:bg-[#161618] rounded-3xl p-5 shadow-apple dark:shadow-apple-dark border border-black/[0.05] dark:border-white/[0.07]">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Riwayat Generasi</h3>
+          <span id="historyCount" class="text-xs text-zinc-400">0 gambar</span>
+        </div>
+        <div id="historyGallery" class="flex gap-3 overflow-x-auto pb-1 min-h-[84px] items-center">
+          <p class="text-xs text-zinc-400 italic">Belum ada gambar yang dibuat pada sesi ini.</p>
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+  <!-- Hidden Canvas for High-Res PNG Compositing (Image + Logo Overlay) -->
+  <canvas id="exportCanvas" class="hidden"></canvas>
+
+  <script>
+    /**
+     * Configuration & Default State
+     */
+    const DEFAULT_LOGO_URL = "https://jhpbtooefyzdndstlzva.supabase.co/storage/v1/object/public/apple/logo.png";
+
+    const PRODUCT_PRESETS = [
+      "iPhone 17 Pro",
+      "Apple Watch Series 10",
+      "AirPods Max",
+      "MacBook Pro M4",
+      "iPad Pro OLED",
+      "Apple Vision Pro"
+    ];
+
+    const VARIABLE_DEFINITIONS = [
+      {
+        key: "background",
+        label: "Background",
+        defaultValue: "clean white premium",
+        presets: [
+          "clean white premium",
+          "dark midnight scratch",
+          "brushed titanium studio",
+          "minimalist warm concrete",
+          "deep obsidian glass reflection"
+        ]
+      },
+      {
+        key: "composition",
+        label: "Composition",
+        defaultValue: "Dynamic 45-degree floating hero angle",
+        presets: [
+          "Dynamic 45-degree floating hero angle",
+          "Center hero symmetrical showcase",
+          "Flat lay minimalist architectural grid",
+          "Close-up macro edge & camera detail",
+          "Zero-gravity levitating perspective"
+        ]
+      },
+      {
+        key: "layout",
+        label: "Layout",
+        defaultValue: "Editorial campaign poster with generous negative space",
+        presets: [
+          "Editorial campaign poster with generous negative space",
+          "Clean luxury catalog card framing",
+          "Split asymmetric showcase",
+          "Minimalist centered gallery frame"
+        ]
+      },
+      {
+        key: "visual",
+        label: "Visual Style",
+        defaultValue: "Ultra-sleek commercial product photography, crisp metallic reflections",
+        presets: [
+          "Ultra-sleek commercial product photography, crisp metallic reflections",
+          "Futuristic anodized depth with subtle rim glow",
+          "Soft tactile matte industrial aesthetic",
+          "High-fashion luxury tech editorial"
+        ]
+      },
+      {
+        key: "lighting",
+        label: "Lighting",
+        defaultValue: "Soft diffused studio softbox lighting with clean specular highlights",
+        presets: [
+          "Soft diffused studio softbox lighting with clean specular highlights",
+          "Dramatic moody rim lighting with deep shadows",
+          "Natural morning architectural window light",
+          "Precision laser-edge studio rim light"
+        ]
+      },
+      {
+        key: "typography",
+        label: "Typography Style",
+        defaultValue: "San Francisco Display Bold, clean geometric Apple-inspired editorial sans-serif",
+        presets: [
+          "San Francisco Display Bold, clean geometric Apple-inspired editorial sans-serif",
+          "Minimalist Swiss Sans, ultra-clean Neo-Grotesque grid",
+          "Editorial Serif, refined luxury magazine display",
+          "Tech Monospace, precision hardware spec typography",
+          "No text overlay, pure clean product visual"
+        ]
+      },
+      {
+        key: "quality",
+        label: "Quality & Render",
+        defaultValue: "8K resolution, photorealistic Octane studio render, razor-sharp focus",
+        presets: [
+          "8K resolution, photorealistic Octane studio render, razor-sharp focus",
+          "Ultra-detailed commercial macro photography, f/8 crisp depth",
+          "Cinema-grade 35mm medium format look, subtle film grain",
+          "Clean Apple keynote hardware render, zero artifacts"
+        ]
+      }
+    ];
+
+    const RATIO_OPTIONS = [
+      { id: "4:5", label: "4:5", sub: "Portrait", cssAspect: "4/5", maxWidthClass: "max-w-[440px]" },
+      { id: "1:1", label: "1:1", sub: "Square", cssAspect: "1/1", maxWidthClass: "max-w-[480px]" },
+      { id: "9:16", label: "9:16", sub: "Story", cssAspect: "9/16", maxWidthClass: "max-w-[340px]" },
+      { id: "3:4", label: "3:4", sub: "Classic", cssAspect: "3/4", maxWidthClass: "max-w-[450px]" },
+      { id: "16:9", label: "16:9", sub: "Wide", cssAspect: "16/9", maxWidthClass: "max-w-full" }
+    ];
+
+    const TYPOGRAPHY_PRESETS = {
+      headline: [
+        "iPhone 17 Pro. Titanium Redefined.",
+        "Pro. Beyond Limits.",
+        "The Future on Your Wrist & Palm.",
+        "Pure Titanium Precision."
+      ],
+      subheadline: [
+        "A19 Pro chip. Pro camera system. All-day battery.",
+        "Thinner. Lighter. Faster than ever before.",
+        "Seamless ecosystem crafted for creators."
+      ],
+      bodyText: [
+        "Engineered from aerospace-grade titanium with an ultra-bright ProMotion display and precision-crafted Apple Watch Series 10.",
+        "Designed for peak performance with next-generation silicon, studio-grade optics, and all-day endurance."
+      ],
+      features: [
+        "A19 Pro Chip",
+        "48MP Fusion Camera",
+        "Grade 5 Titanium",
+        "Always-On Retina",
+        "4:5 Studio Edition",
+        "Spatial Video"
+      ]
+    };
+
+    // Application State
+    let state = {
+      logoUrl: DEFAULT_LOGO_URL,
+      logoOverlay: true,
+      logoPosition: "top-center",
+      logoTone: "auto",
+      resolvedLogoTone: "black", // 'white' | 'black' | 'original'
+      contrastReason: "Light BG",
+      selectedProducts: ["iPhone 17 Pro", "Apple Watch Series 10"],
+      customProducts: [],
+      variables: {},
+      typographyContent: {
+        showGuide: true,
+        placement: "bottom-editorial",
+        contrastMode: "auto",
+        enableHeadline: true,
+        headline: "iPhone 17 Pro. Titanium Redefined.",
+        enableSubheadline: true,
+        subheadline: "A19 Pro chip. Pro camera system. All-day battery.",
+        enableBodyText: true,
+        bodyText: "Engineered from aerospace-grade titanium with an ultra-bright ProMotion display and precision-crafted Apple Watch Series 10.",
+        enableFeatures: true,
+        features: ["A19 Pro Chip", "48MP Fusion Camera", "4:5 Studio Edition"]
+      },
+      ratio: "4:5",
+      manualPromptOverride: false,
+      currentImageDataUrl: null,
+      history: []
+    };
+
+    // Initialize default variable values
+    VARIABLE_DEFINITIONS.forEach(v => {
+      state.variables[v.key] = v.defaultValue;
+    });
+
+    /**
+     * DOM References
+     */
+    const el = {
+      logoUrlInput: document.getElementById("logoUrlInput"),
+      logoFileUpload: document.getElementById("logoFileUpload"),
+      logoThumb: document.getElementById("logoThumb"),
+      logoOverlayToggle: document.getElementById("logoOverlayToggle"),
+      logoPositionSelect: document.getElementById("logoPositionSelect"),
+      logoToneSelect: document.getElementById("logoToneSelect"),
+      logoOptionsRow: document.getElementById("logoOptionsRow"),
+      contrastStatusBadge: document.getElementById("contrastStatusBadge"),
+      contrastStatusDot: document.getElementById("contrastStatusDot"),
+      contrastStatusText: document.getElementById("contrastStatusText"),
+      productChips: document.getElementById("productChips"),
+      productCountBadge: document.getElementById("productCountBadge"),
+      customProductInput: document.getElementById("customProductInput"),
+      btnAddProduct: document.getElementById("btnAddProduct"),
+      variablesContainer: document.getElementById("variablesContainer"),
+      typoStagePreviewToggle: document.getElementById("typoStagePreviewToggle"),
+      typoPlacementSelect: document.getElementById("typoPlacementSelect"),
+      typoContrastSelect: document.getElementById("typoContrastSelect"),
+      enableHeadline: document.getElementById("enableHeadline"),
+      headlinePresets: document.getElementById("headlinePresets"),
+      headlineInput: document.getElementById("headlineInput"),
+      enableSubheadline: document.getElementById("enableSubheadline"),
+      subheadlinePresets: document.getElementById("subheadlinePresets"),
+      subheadlineInput: document.getElementById("subheadlineInput"),
+      enableBodyText: document.getElementById("enableBodyText"),
+      bodyTextPresets: document.getElementById("bodyTextPresets"),
+      bodyTextInput: document.getElementById("bodyTextInput"),
+      enableFeatures: document.getElementById("enableFeatures"),
+      featureChipsContainer: document.getElementById("featureChipsContainer"),
+      featurePresets: document.getElementById("featurePresets"),
+      featureInput: document.getElementById("featureInput"),
+      btnAddFeature: document.getElementById("btnAddFeature"),
+      stageTypoOverlay: document.getElementById("stageTypoOverlay"),
+      stageTypoHeaderGroup: document.getElementById("stageTypoHeaderGroup"),
+      stageHeadlineText: document.getElementById("stageHeadlineText"),
+      stageSubheadlineText: document.getElementById("stageSubheadlineText"),
+      stageBodyText: document.getElementById("stageBodyText"),
+      stageFeaturesRow: document.getElementById("stageFeaturesRow"),
+      ratioPills: document.getElementById("ratioPills"),
+      promptTextarea: document.getElementById("promptTextarea"),
+      btnSyncPrompt: document.getElementById("btnSyncPrompt"),
+      btnCopyPrompt: document.getElementById("btnCopyPrompt"),
+      btnGenerate: document.getElementById("btnGenerate"),
+      btnGenerateText: document.getElementById("btnGenerateText"),
+      btnDownload: document.getElementById("btnDownload"),
+      btnRandomize: document.getElementById("btnRandomize"),
+      btnReset: document.getElementById("btnReset"),
+      btnTheme: document.getElementById("btnTheme"),
+      previewFrame: document.getElementById("previewFrame"),
+      stageRatioBadge: document.getElementById("stageRatioBadge"),
+      emptyState: document.getElementById("emptyState"),
+      loadingOverlay: document.getElementById("loadingOverlay"),
+      generatedImg: document.getElementById("generatedImg"),
+      stageLogoOverlay: document.getElementById("stageLogoOverlay"),
+      stageLogoImg: document.getElementById("stageLogoImg"),
+      activeSummaryPills: document.getElementById("activeSummaryPills"),
+      historyGallery: document.getElementById("historyGallery"),
+      historyCount: document.getElementById("historyCount"),
+      exportCanvas: document.getElementById("exportCanvas"),
+      toastContainer: document.getElementById("toastContainer")
+    };
+
+    /**
+     * Utility: Toast Notification (Replaces alert())
+     */
+    function showToast(message, type = "info") {
+      const toast = document.createElement("div");
+      const colors = {
+        info: "bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900",
+        success: "bg-emerald-600 text-white",
+        error: "bg-rose-600 text-white"
+      };
+      toast.className = `${colors[type] || colors.info} px-4 py-2.5 rounded-2xl text-xs font-medium shadow-xl pointer-events-auto transition-all duration-300 translate-y-2 opacity-0 flex items-center gap-2`;
+      toast.textContent = message;
+      el.toastContainer.appendChild(toast);
+
+      requestAnimationFrame(() => {
+        toast.classList.remove("translate-y-2", "opacity-0");
+      });
+
+      setTimeout(() => {
+        toast.classList.add("opacity-0", "translate-y-2");
+        setTimeout(() => toast.remove(), 300);
+      }, 3200);
+    }
+
+    /**
+     * Render Products Multi-select Chips
+     */
+    function renderProductChips() {
+      const allProducts = [...PRODUCT_PRESETS, ...state.customProducts];
+      el.productChips.innerHTML = "";
+
+      allProducts.forEach(prod => {
+        const isSelected = state.selectedProducts.includes(prod);
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = isSelected
+          ? "px-3 py-1.5 rounded-xl text-xs font-medium bg-blue-600 text-white shadow-sm transition flex items-center gap-1.5"
+          : "px-3 py-1.5 rounded-xl text-xs font-medium bg-[#F5F5F7] dark:bg-[#222225] text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200/70 dark:hover:bg-zinc-700/70 transition flex items-center gap-1.5";
+
+        btn.innerHTML = `
+          <span>${prod}</span>
+          ${isSelected ? '<svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/></svg>' : ''}
+        `;
+        btn.addEventListener("click", () => {
+          if (state.selectedProducts.includes(prod)) {
+            if (state.selectedProducts.length > 1) {
+              state.selectedProducts = state.selectedProducts.filter(p => p !== prod);
+            } else {
+              showToast("Minimal 1 produk harus dipilih.", "info");
+            }
+          } else {
+            state.selectedProducts.push(prod);
+          }
+          renderProductChips();
+          updatePromptAndSummary();
+        });
+        el.productChips.appendChild(btn);
+      });
+
+      el.productCountBadge.textContent = `${state.selectedProducts.length} dipilih`;
+    }
+
+    /**
+     * Render Scene & Art Direction Variables (Presets + Custom Input)
+     */
+    function renderVariables() {
+      el.variablesContainer.innerHTML = "";
+
+      VARIABLE_DEFINITIONS.forEach(def => {
+        const wrapper = document.createElement("div");
+        wrapper.className = "space-y-1.5";
+
+        const labelRow = document.createElement("div");
+        labelRow.className = "flex items-center justify-between";
+        labelRow.innerHTML = `<label class="text-xs font-medium text-zinc-700 dark:text-zinc-300">${def.label}</label>`;
+        wrapper.appendChild(labelRow);
+
+        // Quick preset pills
+        const pillRow = document.createElement("div");
+        pillRow.className = "flex flex-wrap gap-1.5 pb-1";
+
+        def.presets.forEach(presetText => {
+          const isMatch = state.variables[def.key].toLowerCase() === presetText.toLowerCase();
+          const chip = document.createElement("button");
+          chip.type = "button";
+          // Short display label if long
+          const shortLabel = presetText.length > 34 ? presetText.slice(0, 32) + "…" : presetText;
+          chip.textContent = shortLabel;
+          chip.title = presetText;
+          chip.className = isMatch
+            ? "px-2.5 py-1 rounded-lg text-[11px] font-medium bg-zinc-900 dark:bg-white text-white dark:text-black transition"
+            : "px-2.5 py-1 rounded-lg text-[11px] font-medium bg-[#F5F5F7] dark:bg-[#222225] text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition";
+
+          chip.addEventListener("click", () => {
+            state.variables[def.key] = presetText;
+            input.value = presetText;
+            renderVariables();
+            updatePromptAndSummary();
+          });
+          pillRow.appendChild(chip);
+        });
+        wrapper.appendChild(pillRow);
+
+        // Editable text input for custom or fine-tuned value
+        const input = document.createElement("input");
+        input.type = "text";
+        input.value = state.variables[def.key];
+        input.placeholder = `Isi atau pilih preset ${def.label.toLowerCase()}...`;
+        input.className = "w-full text-xs px-3.5 py-2 rounded-xl bg-[#F5F5F7] dark:bg-[#222225] border border-transparent focus:border-blue-500 focus:bg-white dark:focus:bg-[#1C1C1E] outline-none transition";
+
+        input.addEventListener("input", (e) => {
+          state.variables[def.key] = e.target.value;
+          if (def.key === "background") {
+            updateLogoPreview();
+            updateTypographyStagePreview();
+          }
+          updatePromptAndSummary();
+        });
+
+        wrapper.appendChild(input);
+        el.variablesContainer.appendChild(wrapper);
+      });
+    }
+
+    /**
+     * Render Typography Quick Presets & Feature Chips
+     */
+    function renderTypographyControls() {
+      const tc = state.typographyContent;
+
+      // Headline presets
+      el.headlinePresets.innerHTML = "";
+      TYPOGRAPHY_PRESETS.headline.forEach(text => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.textContent = text.length > 26 ? text.slice(0, 24) + "…" : text;
+        btn.title = text;
+        btn.className = tc.headline === text
+          ? "px-2 py-0.5 rounded-md text-[10px] font-medium bg-zinc-900 dark:bg-white text-white dark:text-black transition"
+          : "px-2 py-0.5 rounded-md text-[10px] font-medium bg-white dark:bg-[#141416] text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white border border-black/[0.05] dark:border-white/[0.06] transition";
+        btn.addEventListener("click", () => {
+          tc.headline = text;
+          tc.enableHeadline = true;
+          el.enableHeadline.checked = true;
+          el.headlineInput.value = text;
+          renderTypographyControls();
+          updateTypographyStagePreview();
+          updatePromptAndSummary();
+        });
+        el.headlinePresets.appendChild(btn);
+      });
+
+      // Subheadline presets
+      el.subheadlinePresets.innerHTML = "";
+      TYPOGRAPHY_PRESETS.subheadline.forEach(text => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.textContent = text.length > 28 ? text.slice(0, 26) + "…" : text;
+        btn.title = text;
+        btn.className = tc.subheadline === text
+          ? "px-2 py-0.5 rounded-md text-[10px] font-medium bg-zinc-900 dark:bg-white text-white dark:text-black transition"
+          : "px-2 py-0.5 rounded-md text-[10px] font-medium bg-white dark:bg-[#141416] text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white border border-black/[0.05] dark:border-white/[0.06] transition";
+        btn.addEventListener("click", () => {
+          tc.subheadline = text;
+          tc.enableSubheadline = true;
+          el.enableSubheadline.checked = true;
+          el.subheadlineInput.value = text;
+          renderTypographyControls();
+          updateTypographyStagePreview();
+          updatePromptAndSummary();
+        });
+        el.subheadlinePresets.appendChild(btn);
+      });
+
+      // Body Text presets
+      el.bodyTextPresets.innerHTML = "";
+      TYPOGRAPHY_PRESETS.bodyText.forEach((text, idx) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.textContent = `Copy Preset ${idx + 1}`;
+        btn.title = text;
+        btn.className = tc.bodyText === text
+          ? "px-2 py-0.5 rounded-md text-[10px] font-medium bg-zinc-900 dark:bg-white text-white dark:text-black transition"
+          : "px-2 py-0.5 rounded-md text-[10px] font-medium bg-white dark:bg-[#141416] text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white border border-black/[0.05] dark:border-white/[0.06] transition";
+        btn.addEventListener("click", () => {
+          tc.bodyText = text;
+          tc.enableBodyText = true;
+          el.enableBodyText.checked = true;
+          el.bodyTextInput.value = text;
+          renderTypographyControls();
+          updateTypographyStagePreview();
+          updatePromptAndSummary();
+        });
+        el.bodyTextPresets.appendChild(btn);
+      });
+
+      // Active Feature Chips (Removable)
+      el.featureChipsContainer.innerHTML = "";
+      tc.features.forEach(feat => {
+        const chip = document.createElement("span");
+        chip.className = "inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-medium bg-blue-600/10 text-blue-700 dark:text-blue-300 border border-blue-500/20";
+        chip.innerHTML = `
+          <span>${feat}</span>
+          <button type="button" class="hover:text-rose-500 font-bold leading-none ml-0.5" aria-label="Hapus fitur">&times;</button>
+        `;
+        chip.querySelector("button").addEventListener("click", () => {
+          tc.features = tc.features.filter(f => f !== feat);
+          renderTypographyControls();
+          updateTypographyStagePreview();
+          updatePromptAndSummary();
+        });
+        el.featureChipsContainer.appendChild(chip);
+      });
+
+      // Quick Feature Preset Suggestions
+      el.featurePresets.innerHTML = "";
+      TYPOGRAPHY_PRESETS.features.forEach(feat => {
+        if (tc.features.includes(feat)) return;
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.textContent = `+ ${feat}`;
+        btn.className = "px-2 py-0.5 rounded-md text-[10px] font-medium bg-white dark:bg-[#141416] text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white border border-dashed border-black/15 dark:border-white/15 transition";
+        btn.addEventListener("click", () => {
+          tc.features.push(feat);
+          tc.enableFeatures = true;
+          el.enableFeatures.checked = true;
+          renderTypographyControls();
+          updateTypographyStagePreview();
+          updatePromptAndSummary();
+        });
+        el.featurePresets.appendChild(btn);
+      });
+    }
+
+    /**
+     * Resolve Typography Contrast Tone (Light Text on Dark BG vs Dark Text on Light BG)
+     */
+    function resolveTypographyContrastTone() {
+      const mode = state.typographyContent.contrastMode;
+      if (mode === "light-text") return "white";
+      if (mode === "dark-text") return "black";
+
+      // Smart auto detection based on background keywords (matching logo contrast logic)
+      const kw = detectToneFromBackgroundKeywords(state.variables.background);
+      return kw.tone; // 'white' for dark BG, 'black' for light BG
+    }
+
+    /**
+     * Update Live Typography Hierarchy Guide on Preview Stage
+     */
+    function updateTypographyStagePreview() {
+      const tc = state.typographyContent;
+      const hasAnyText =
+        (tc.enableHeadline && tc.headline.trim()) ||
+        (tc.enableSubheadline && tc.subheadline.trim()) ||
+        (tc.enableBodyText && tc.bodyText.trim()) ||
+        (tc.enableFeatures && tc.features.length > 0);
+
+      // Hide guide if toggled off, if no text exists, or if user prefers clean image inspection after generation
+      if (!tc.showGuide || !hasAnyText) {
+        el.stageTypoOverlay.classList.add("hidden");
+        return;
+      }
+      el.stageTypoOverlay.classList.remove("hidden");
+
+      // Determine contrast styling
+      const textTone = resolveTypographyContrastTone();
+      const isWhiteText = textTone === "white";
+
+      el.stageTypoOverlay.className = "pointer-events-none absolute inset-x-5 z-10 transition-all duration-300 flex flex-col gap-1.5 rounded-2xl p-3.5 backdrop-blur-[2px]";
+      if (isWhiteText) {
+        el.stageTypoOverlay.classList.add("text-white", "bg-gradient-to-t", "from-black/55", "via-black/25", "to-transparent");
+      } else {
+        el.stageTypoOverlay.classList.add("text-zinc-900", "bg-gradient-to-t", "from-white/75", "via-white/40", "to-transparent");
+      }
+
+      // Placement positioning
+      if (tc.placement === "top-editorial") {
+        el.stageTypoOverlay.classList.add(state.logoOverlay && state.logoPosition.startsWith("top") ? "top-16" : "top-5", "text-center", "items-center");
+      } else if (tc.placement === "left-aligned") {
+        el.stageTypoOverlay.classList.add("bottom-5", "text-left", "items-start");
+      } else {
+        el.stageTypoOverlay.classList.add("bottom-5", "text-center", "items-center");
+      }
+
+      // Font family hint based on Typography Style variable
+      const styleLower = (state.variables.typography || "").toLowerCase();
+      if (styleLower.includes("serif")) {
+        el.stageTypoOverlay.style.fontFamily = "Georgia, 'Times New Roman', serif";
+      } else if (styleLower.includes("mono")) {
+        el.stageTypoOverlay.style.fontFamily = "ui-monospace, SFMono-Regular, Menlo, monospace";
+      } else {
+        el.stageTypoOverlay.style.fontFamily = "'Inter', -apple-system, BlinkMacSystemFont, sans-serif";
+      }
+
+      // Headline
+      if (tc.enableHeadline && tc.headline.trim()) {
+        el.stageHeadlineText.textContent = tc.headline.trim();
+        el.stageHeadlineText.classList.remove("hidden");
+      } else {
+        el.stageHeadlineText.classList.add("hidden");
+      }
+
+      // Subheadline
+      if (tc.enableSubheadline && tc.subheadline.trim()) {
+        el.stageSubheadlineText.textContent = tc.subheadline.trim();
+        el.stageSubheadlineText.classList.remove("hidden");
+      } else {
+        el.stageSubheadlineText.classList.add("hidden");
+      }
+
+      // Body Text
+      if (tc.enableBodyText && tc.bodyText.trim()) {
+        el.stageBodyText.textContent = tc.bodyText.trim();
+        el.stageBodyText.classList.remove("hidden");
+      } else {
+        el.stageBodyText.classList.add("hidden");
+      }
+
+      // Feature Badges
+      if (tc.enableFeatures && tc.features.length > 0) {
+        el.stageFeaturesRow.classList.remove("hidden");
+        el.stageFeaturesRow.className = `flex flex-wrap gap-1 pt-1 ${tc.placement === "left-aligned" ? "justify-start" : "justify-center"}`;
+        el.stageFeaturesRow.innerHTML = tc.features.map(f => `
+          <span class="text-[9px] font-semibold tracking-wide px-2 py-0.5 rounded-full border ${
+            isWhiteText
+              ? "bg-white/15 text-white border-white/25"
+              : "bg-black/10 text-zinc-900 border-black/15"
+          }">${f}</span>
+        `).join("");
+      } else {
+        el.stageFeaturesRow.classList.add("hidden");
+      }
+    }
+
+    /**
+     * Render Aspect Ratio Selector Pills
+     */
+    function renderRatioPills() {
+      el.ratioPills.innerHTML = "";
+      RATIO_OPTIONS.forEach(opt => {
+        const active = state.ratio === opt.id;
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = active
+          ? "py-2 px-2 rounded-xl border-2 border-blue-600 bg-blue-500/10 text-blue-600 dark:text-blue-400 flex flex-col items-center justify-center transition"
+          : "py-2 px-2 rounded-xl border border-black/[0.08] dark:border-white/[0.1] bg-[#F5F5F7] dark:bg-[#222225] text-zinc-600 dark:text-zinc-300 hover:border-zinc-400 flex flex-col items-center justify-center transition";
+
+        btn.innerHTML = `
+          <span class="text-xs font-semibold">${opt.label}</span>
+          <span class="text-[10px] opacity-75">${opt.sub}</span>
+        `;
+
+        btn.addEventListener("click", () => {
+          state.ratio = opt.id;
+          applyStageRatio(opt);
+          renderRatioPills();
+          updatePromptAndSummary();
+        });
+        el.ratioPills.appendChild(btn);
+      });
+    }
+
+    /**
+     * Update Preview Stage Dimensions & Labels based on Ratio
+     */
+    function applyStageRatio(opt) {
+      el.previewFrame.style.aspectRatio = opt.cssAspect;
+      // Remove previous max-width classes
+      RATIO_OPTIONS.forEach(r => el.previewFrame.classList.remove(r.maxWidthClass));
+      el.previewFrame.classList.add(opt.maxWidthClass);
+
+      el.stageRatioBadge.textContent = `${opt.label} ${opt.sub}`;
+      el.btnGenerateText.textContent = `Generate Product Image (${opt.label})`;
+    }
+
+    /**
+     * Layer A: Keyword-Based Background Luminance Detection
+     */
+    function detectToneFromBackgroundKeywords(bgText) {
+      const text = (bgText || "").toLowerCase();
+      const darkKeywords = [
+        "dark", "midnight", "black", "night", "shadow", "obsidian",
+        "space", "deep", "noir", "charcoal", "slate"
+      ];
+      const lightKeywords = [
+        "white", "clean", "light", "bright", "cream", "pastel",
+        "snow", "silver", "ivory", "minimal", "day"
+      ];
+
+      let darkScore = 0;
+      let lightScore = 0;
+
+      darkKeywords.forEach(kw => {
+        if (text.includes(kw)) darkScore++;
+      });
+      lightKeywords.forEach(kw => {
+        if (text.includes(kw)) lightScore++;
+      });
+
+      if (darkScore > lightScore) {
+        return { tone: "white", reason: "Dark BG" };
+      }
+      if (lightScore > darkScore) {
+        return { tone: "black", reason: "Light BG" };
+      }
+      // Fallback to current UI theme brightness if neutral/ambiguous
+      const isDarkUI = document.documentElement.classList.contains("dark");
+      return isDarkUI
+        ? { tone: "white", reason: "Dark Stage" }
+        : { tone: "black", reason: "Light Stage" };
+    }
+
+    /**
+     * Layer B: Real-Time Pixel Relative Luminance Sampling on Generated Image
+     */
+    function sampleImageLuminanceAtLogoArea(imgElement, position) {
+      return new Promise((resolve) => {
+        if (!imgElement || !imgElement.src || imgElement.classList.contains("hidden") || !imgElement.complete || !imgElement.naturalWidth) {
+          resolve(null);
+          return;
+        }
+
+        try {
+          const sampleCanvas = document.createElement("canvas");
+          const w = 160;
+          const h = 200;
+          sampleCanvas.width = w;
+          sampleCanvas.height = h;
+          const ctx = sampleCanvas.getContext("2d", { willReadFrequently: true });
+          ctx.drawImage(imgElement, 0, 0, w, h);
+
+          // Define sampling bounding box matching the logo position
+          const boxW = Math.round(w * 0.28);
+          const boxH = Math.round(h * 0.14);
+          const padX = Math.round(w * 0.06);
+          const padY = Math.round(h * 0.05);
+
+          let sx = Math.round((w - boxW) / 2);
+          let sy = padY;
+
+          switch (position) {
+            case "top-left":
+              sx = padX;
+              sy = padY;
+              break;
+            case "top-right":
+              sx = w - boxW - padX;
+              sy = padY;
+              break;
+            case "top-center":
+              sx = Math.round((w - boxW) / 2);
+              sy = padY;
+              break;
+            case "bottom-left":
+              sx = padX;
+              sy = h - boxH - padY;
+              break;
+            case "bottom-right":
+              sx = w - boxW - padX;
+              sy = h - boxH - padY;
+              break;
+            case "bottom-center":
+              sx = Math.round((w - boxW) / 2);
+              sy = h - boxH - padY;
+              break;
+          }
+
+          const imageData = ctx.getImageData(sx, sy, boxW, boxH).data;
+          let totalLuminance = 0;
+          let pixelCount = 0;
+
+          for (let i = 0; i < imageData.length; i += 4) {
+            // Convert sRGB to linear relative luminance (WCAG formula)
+            const rLin = Math.pow(imageData[i] / 255, 2.2);
+            const gLin = Math.pow(imageData[i + 1] / 255, 2.2);
+            const bLin = Math.pow(imageData[i + 2] / 255, 2.2);
+            const lum = 0.2126 * rLin + 0.7152 * gLin + 0.0722 * bLin;
+            totalLuminance += lum;
+            pixelCount++;
+          }
+
+          const avgLuminance = pixelCount > 0 ? totalLuminance / pixelCount : 0.5;
+          resolve(avgLuminance);
+        } catch (err) {
+          resolve(null);
+        }
+      });
+    }
+
+    /**
+     * Resolve Active Logo Contrast Tone (Auto Smart vs Manual) & Update UI
+     */
+    async function resolveLogoContrastState() {
+      if (state.logoTone !== "auto") {
+        state.resolvedLogoTone = state.logoTone;
+        const manualLabels = {
+          original: "Manual: Original Brand Color",
+          white: "Manual: Pure White (#FFFFFF)",
+          black: "Manual: Deep Black (#111111)"
+        };
+        state.contrastReason = manualLabels[state.logoTone] || "Manual";
+        return;
+      }
+
+      // Layer B takes precedence if a generated image is visible on stage
+      const sampledLum = await sampleImageLuminanceAtLogoArea(el.generatedImg, state.logoPosition);
+      if (sampledLum !== null) {
+        const lumPct = Math.round(sampledLum * 100);
+        if (sampledLum < 0.5) {
+          state.resolvedLogoTone = "white";
+          state.contrastReason = `Auto-detected: Dark Area (${lumPct}% lum) → White Logo`;
+        } else {
+          state.resolvedLogoTone = "black";
+          state.contrastReason = `Auto-detected: Light Area (${lumPct}% lum) → Dark Logo`;
+        }
+        return;
+      }
+
+      // Layer A fallback: analyze background prompt keywords
+      const kwResult = detectToneFromBackgroundKeywords(state.variables.background);
+      state.resolvedLogoTone = kwResult.tone;
+      state.contrastReason = kwResult.tone === "white"
+        ? `Auto-detected: ${kwResult.reason} → White Logo`
+        : `Auto-detected: ${kwResult.reason} → Dark Logo`;
+    }
+
+    /**
+     * Update Live Logo Preview, Contrast Status Badge & Stage Overlay Position/Filter
+     */
+    async function updateLogoPreview() {
+      const url = state.logoUrl.trim();
+      el.logoThumb.src = url || DEFAULT_LOGO_URL;
+      el.stageLogoImg.src = url || DEFAULT_LOGO_URL;
+
+      // Toggle visibility
+      if (state.logoOverlay && url) {
+        el.stageLogoOverlay.classList.remove("hidden");
+        el.logoOptionsRow.classList.remove("opacity-40", "pointer-events-none");
+      } else {
+        el.stageLogoOverlay.classList.add("hidden");
+        el.logoOptionsRow.classList.add("opacity-40", "pointer-events-none");
+      }
+
+      // Compute effective tone (Auto-Contrast or Manual)
+      await resolveLogoContrastState();
+
+      // Update Contrast Status Indicator Badge
+      el.contrastStatusText.textContent = state.contrastReason;
+      if (state.resolvedLogoTone === "white") {
+        el.contrastStatusDot.className = "w-2.5 h-2.5 rounded-full bg-white border border-zinc-400 shadow-sm shrink-0";
+      } else if (state.resolvedLogoTone === "black") {
+        el.contrastStatusDot.className = "w-2.5 h-2.5 rounded-full bg-[#111111] border border-zinc-400 shadow-sm shrink-0";
+      } else {
+        el.contrastStatusDot.className = "w-2.5 h-2.5 rounded-full bg-gradient-to-tr from-blue-500 to-emerald-400 shrink-0";
+      }
+
+      // Apply high-contrast CSS filter on stage logo & thumbnail
+      let stageFilterCss = "none";
+      let thumbFilterCss = "none";
+      const thumbBox = el.logoThumb.parentElement;
+
+      if (state.resolvedLogoTone === "white") {
+        stageFilterCss = "brightness(0) invert(1) drop-shadow(0 2px 8px rgba(0, 0, 0, 0.45))";
+        thumbFilterCss = "brightness(0) invert(1)";
+        thumbBox.classList.remove("bg-[#F5F5F7]", "dark:bg-[#222225]");
+        thumbBox.classList.add("bg-zinc-900");
+      } else if (state.resolvedLogoTone === "black") {
+        stageFilterCss = "brightness(0) saturate(100%) contrast(115%) drop-shadow(0 1px 4px rgba(255, 255, 255, 0.35))";
+        thumbFilterCss = "brightness(0) saturate(100%)";
+        thumbBox.classList.remove("bg-zinc-900");
+        thumbBox.classList.add("bg-[#F5F5F7]", "dark:bg-[#222225]");
+      } else {
+        thumbBox.classList.remove("bg-zinc-900");
+        thumbBox.classList.add("bg-[#F5F5F7]", "dark:bg-[#222225]");
+      }
+
+      el.logoThumb.style.filter = thumbFilterCss;
+      el.stageLogoImg.style.filter = stageFilterCss;
+
+      // Apply position classes on preview frame (6 positions supported)
+      el.stageLogoOverlay.className = "pointer-events-none absolute z-10 transition-all duration-300";
+      switch (state.logoPosition) {
+        case "top-center":
+          el.stageLogoOverlay.classList.add("top-6", "left-1/2", "-translate-x-1/2");
+          break;
+        case "top-left":
+          el.stageLogoOverlay.classList.add("top-6", "left-6");
+          break;
+        case "top-right":
+          el.stageLogoOverlay.classList.add("top-6", "right-6");
+          break;
+        case "bottom-left":
+          el.stageLogoOverlay.classList.add("bottom-6", "left-6");
+          break;
+        case "bottom-right":
+          el.stageLogoOverlay.classList.add("bottom-6", "right-6");
+          break;
+        case "bottom-center":
+          el.stageLogoOverlay.classList.add("bottom-6", "left-1/2", "-translate-x-1/2");
+          break;
+      }
+    }
+
+    /**
+     * Build Structured Prompt from Current Variables
+     */
+    function buildCompiledPrompt() {
+      const productsStr = state.selectedProducts.join(" and ");
+      const v = state.variables;
+      const tc = state.typographyContent;
+
+      let promptParts = [
+        `Commercial flagship product photography featuring ${productsStr}.`,
+        `Background environment: ${v.background}.`,
+        `Composition & Camera angle: ${v.composition}.`,
+        `Layout framing: ${v.layout}.`,
+        `Visual aesthetic: ${v.visual}.`,
+        `Lighting setup: ${v.lighting}.`
+      ];
+
+      // Build structured typographic hierarchy instructions
+      const typoItems = [];
+      if (tc.enableHeadline && tc.headline.trim()) {
+        typoItems.push(`Headline (largest primary focal text, exact spelling): "${tc.headline.trim()}"`);
+      }
+      if (tc.enableSubheadline && tc.subheadline.trim()) {
+        typoItems.push(`Subheadline (secondary supporting text below headline): "${tc.subheadline.trim()}"`);
+      }
+      if (tc.enableBodyText && tc.bodyText.trim()) {
+        typoItems.push(`Body text (clean, refined descriptive copy): "${tc.bodyText.trim()}"`);
+      }
+      if (tc.enableFeatures && tc.features.length > 0) {
+        typoItems.push(`Feature highlight badges/callouts: [${tc.features.map(f => `"${f}"`).join(", ")}]`);
+      }
+
+      const resolvedTextTone = resolveTypographyContrastTone();
+      const contrastDirective = resolvedTextTone === "white"
+        ? "crisp high-contrast pure white (#FFFFFF) typography with subtle drop shadow for maximum legibility against the dark background"
+        : "crisp high-contrast deep obsidian (#111111) typography for maximum legibility against the light background";
+
+      const placementMap = {
+        "top-editorial": "arranged cleanly in the upper editorial margin",
+        "bottom-editorial": "arranged cleanly in the lower editorial margin",
+        "split-top-bottom": "with Headline & Subheadline at the top and Body Text & Feature badges anchored cleanly at the bottom",
+        "left-aligned": "left-aligned cleanly along the editorial grid margin"
+      };
+
+      if (typoItems.length > 0 && !v.typography.toLowerCase().includes("no text")) {
+        promptParts.push(
+          `Typography & Editorial Hierarchy: Render ${v.typography} ${placementMap[tc.placement] || "in clean negative space"}, using ${contrastDirective}. Include exact spelled text hierarchy: ${typoItems.join("; ")}.`
+        );
+      } else {
+        promptParts.push(`Typography & text: ${v.typography}.`);
+      }
+
+      if (state.logoOverlay) {
+        promptParts.push(`Leave clean uncluttered breathing room at the ${state.logoPosition.replace("-", " ")} area for brand logo placement.`);
+      }
+
+      promptParts.push(`Rendering quality: ${v.quality}. Aspect ratio ${state.ratio}.`);
+
+      return promptParts.join(" ");
+    }
+
+    /**
+     * Sync Prompt Box & Active Variable Summary Pills
+     */
+    function updatePromptAndSummary() {
+      if (!state.manualPromptOverride) {
+        el.promptTextarea.value = buildCompiledPrompt();
+        el.btnSyncPrompt.classList.add("hidden");
+      }
+
+      // Render quick summary pills beneath preview stage
+      const tc = state.typographyContent;
+      const pills = [
+        ...state.selectedProducts,
+        state.variables.background,
+        ...(tc.enableFeatures ? tc.features.slice(0, 2) : []),
+        state.ratio
+      ].filter(Boolean);
+
+      el.activeSummaryPills.innerHTML = pills.map(text => `
+        <span class="text-[11px] px-2.5 py-1 rounded-full bg-[#F5F5F7] dark:bg-[#222225] text-zinc-600 dark:text-zinc-300 border border-black/[0.04] dark:border-white/[0.06]">
+          ${text}
+        </span>
+      `).join("");
+    }
+
+    /**
+     * Call Gemini Image Generation API (gemini-3.1-flash-image) with Exponential Backoff
+     */
+    async function generateImageWithGemini(promptText, aspectRatio) {
+      const apiKey = ""; // Provided automatically by runtime environment
+      const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image:generateContent?key=${apiKey}`;
+
+      const payload = {
+        contents: [
+          {
+            role: "user",
+            parts: [{ text: promptText }]
+          }
+        ],
+        generationConfig: {
+          responseModalities: ["IMAGE"],
+          imageConfig: {
+            aspectRatio: aspectRatio
+          }
+        }
+      };
+
+      const maxRetries = 3;
+      let delay = 1000;
+
+      for (let attempt = 0; attempt <= maxRetries; attempt++) {
+        try {
+          const response = await fetch(apiUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+          });
+
+          if (!response.ok) {
+            const errData = await response.json().catch(() => ({}));
+            throw new Error(errData?.error?.message || `HTTP ${response.status}`);
+          }
+
+          const result = await response.json();
+          const part = result?.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
+
+          if (!part || !part.inlineData?.data) {
+            throw new Error("Respons API tidak menyertakan data gambar.");
+          }
+
+          const mime = part.inlineData.mimeType || "image/png";
+          return `data:${mime};base64,${part.inlineData.data}`;
+        } catch (err) {
+          if (attempt === maxRetries) {
+            throw err;
+          }
+          await new Promise(res => setTimeout(res, delay));
+          delay *= 2;
+        }
+      }
+    }
+
+    /**
+     * Handle Generate Button Click
+     */
+    async function handleGenerate() {
+      const promptToUse = el.promptTextarea.value.trim();
+      if (!promptToUse) {
+        showToast("Prompt tidak boleh kosong.", "error");
+        return;
+      }
+
+      // Set Loading UI
+      el.btnGenerate.disabled = true;
+      el.btnGenerate.classList.add("opacity-70", "cursor-not-allowed");
+      el.loadingOverlay.classList.remove("hidden");
+      el.emptyState.classList.add("hidden");
+
+      try {
+        const imageDataUrl = await generateImageWithGemini(promptToUse, state.ratio);
+        state.currentImageDataUrl = imageDataUrl;
+
+        // Display generated image
+        el.generatedImg.src = imageDataUrl;
+        el.generatedImg.classList.remove("hidden");
+        el.btnDownload.disabled = false;
+
+        // Auto-hide live guide overlay once AI image with rendered typography is generated (user can toggle back on anytime)
+        state.typographyContent.showGuide = false;
+        el.typoStagePreviewToggle.checked = false;
+        updateTypographyStagePreview();
+
+        // Wait for image decode so pixel luminance sampling runs accurately on the new render
+        await new Promise((resolve) => {
+          if (el.generatedImg.complete) resolve();
+          else el.generatedImg.onload = resolve;
+        });
+        await updateLogoPreview();
+
+        // Add to History
+        const historyItem = {
+          id: Date.now(),
+          imageUrl: imageDataUrl,
+          prompt: promptToUse,
+          ratio: state.ratio,
+          products: [...state.selectedProducts],
+          logoOverlay: state.logoOverlay,
+          logoPosition: state.logoPosition,
+          logoTone: state.logoTone
+        };
+        state.history.unshift(historyItem);
+        renderHistory();
+
+        showToast("Gambar produk berhasil dibuat!", "success");
+      } catch (error) {
+        showToast(`Gagal membuat gambar: ${error.message}`, "error");
+        if (!state.currentImageDataUrl) {
+          el.emptyState.classList.remove("hidden");
+        }
+      } finally {
+        el.btnGenerate.disabled = false;
+        el.btnGenerate.classList.remove("opacity-70", "cursor-not-allowed");
+        el.loadingOverlay.classList.add("hidden");
+      }
+    }
+
+    /**
+     * Render History Strip
+     */
+    function renderHistory() {
+      el.historyCount.textContent = `${state.history.length} gambar`;
+      if (state.history.length === 0) {
+        el.historyGallery.innerHTML = `<p class="text-xs text-zinc-400 italic">Belum ada gambar yang dibuat pada sesi ini.</p>`;
+        return;
+      }
+
+      el.historyGallery.innerHTML = "";
+      state.history.forEach(item => {
+        const thumbBtn = document.createElement("button");
+        thumbBtn.type = "button";
+        thumbBtn.className = "relative group shrink-0 w-16 h-20 rounded-xl overflow-hidden border-2 border-transparent hover:border-blue-500 focus:border-blue-500 transition bg-zinc-100 dark:bg-zinc-800";
+        thumbBtn.innerHTML = `
+          <img src="${item.imageUrl}" alt="History thumbnail" class="w-full h-full object-cover" />
+          <span class="absolute bottom-1 right-1 text-[9px] font-semibold px-1.5 py-0.2 rounded bg-black/70 text-white">${item.ratio}</span>
+        `;
+        thumbBtn.addEventListener("click", async () => {
+          state.currentImageDataUrl = item.imageUrl;
+          el.generatedImg.src = item.imageUrl;
+          el.generatedImg.classList.remove("hidden");
+          el.emptyState.classList.add("hidden");
+          el.btnDownload.disabled = false;
+
+          // Restore ratio view
+          const ratioOpt = RATIO_OPTIONS.find(r => r.id === item.ratio);
+          if (ratioOpt) {
+            state.ratio = ratioOpt.id;
+            applyStageRatio(ratioOpt);
+            renderRatioPills();
+          }
+
+          await new Promise((resolve) => {
+            if (el.generatedImg.complete) resolve();
+            else el.generatedImg.onload = resolve;
+          });
+          await updateLogoPreview();
+          showToast("Memuat gambar dari riwayat & menyelaraskan kontras logo.", "info");
+        });
+        el.historyGallery.appendChild(thumbBtn);
+      });
+    }
+
+    /**
+     * Render Recolored High-Contrast Logo onto an Offscreen Canvas (Pixel Manipulation)
+     */
+    function createRecoloredLogoCanvas(logoImg, targetWidth, targetHeight, tone) {
+      const offCanvas = document.createElement("canvas");
+      offCanvas.width = targetWidth;
+      offCanvas.height = targetHeight;
+      const offCtx = offCanvas.getContext("2d", { willReadFrequently: true });
+      offCtx.drawImage(logoImg, 0, 0, targetWidth, targetHeight);
+
+      if (tone === "white" || tone === "black") {
+        const imgData = offCtx.getImageData(0, 0, targetWidth, targetHeight);
+        const data = imgData.data;
+        const targetR = tone === "white" ? 255 : 17;
+        const targetG = tone === "white" ? 255 : 17;
+        const targetB = tone === "white" ? 255 : 17;
+
+        for (let i = 0; i < data.length; i += 4) {
+          const alpha = data[i + 3];
+          if (alpha > 0) {
+            data[i] = targetR;
+            data[i + 1] = targetG;
+            data[i + 2] = targetB;
+          }
+        }
+        offCtx.putImageData(imgData, 0, 0);
+      }
+
+      return offCanvas;
+    }
+
+    /**
+     * Composite Generated Image + Crisp Recolored Logo Overlay onto Canvas & Download PNG
+     */
+    async function handleDownloadPng() {
+      if (!state.currentImageDataUrl) return;
+
+      // Ensure latest contrast calculation is up to date
+      await resolveLogoContrastState();
+
+      const canvas = el.exportCanvas;
+      const ctx = canvas.getContext("2d");
+
+      const baseImg = new Image();
+      baseImg.crossOrigin = "anonymous";
+
+      baseImg.onload = async () => {
+        canvas.width = baseImg.naturalWidth || 1080;
+        canvas.height = baseImg.naturalHeight || 1350;
+
+        // Draw base generated image
+        ctx.drawImage(baseImg, 0, 0, canvas.width, canvas.height);
+
+        // Draw Logo Overlay if enabled
+        if (state.logoOverlay && state.logoUrl.trim()) {
+          try {
+            const logoImg = await loadLogoForCanvas(state.logoUrl.trim());
+            const targetHeight = Math.max(24, Math.round(canvas.height * 0.055));
+            const aspect = logoImg.naturalWidth / (logoImg.naturalHeight || 1);
+            const targetWidth = Math.max(24, Math.round(targetHeight * aspect));
+            const marginX = Math.round(canvas.width * 0.055);
+            const marginY = Math.round(canvas.height * 0.048);
+
+            let x = (canvas.width - targetWidth) / 2;
+            let y = marginY;
+
+            switch (state.logoPosition) {
+              case "top-left":
+                x = marginX;
+                y = marginY;
+                break;
+              case "top-right":
+                x = canvas.width - targetWidth - marginX;
+                y = marginY;
+                break;
+              case "top-center":
+                x = (canvas.width - targetWidth) / 2;
+                y = marginY;
+                break;
+              case "bottom-left":
+                x = marginX;
+                y = canvas.height - targetHeight - marginY;
+                break;
+              case "bottom-right":
+                x = canvas.width - targetWidth - marginX;
+                y = canvas.height - targetHeight - marginY;
+                break;
+              case "bottom-center":
+                x = (canvas.width - targetWidth) / 2;
+                y = canvas.height - targetHeight - marginY;
+                break;
+            }
+
+            // Use pixel-accurate offscreen recoloring so exported PNG matches preview 100%
+            const recoloredLogo = createRecoloredLogoCanvas(
+              logoImg,
+              targetWidth,
+              targetHeight,
+              state.resolvedLogoTone
+            );
+
+            ctx.save();
+            if (state.resolvedLogoTone === "white") {
+              ctx.shadowColor = "rgba(0, 0, 0, 0.35)";
+              ctx.shadowBlur = Math.round(targetHeight * 0.25);
+              ctx.shadowOffsetY = Math.round(targetHeight * 0.06);
+            } else if (state.resolvedLogoTone === "black") {
+              ctx.shadowColor = "rgba(255, 255, 255, 0.25)";
+              ctx.shadowBlur = Math.round(targetHeight * 0.15);
+            }
+            ctx.drawImage(recoloredLogo, x, y, targetWidth, targetHeight);
+            ctx.restore();
+          } catch (e) {
+            // Fallback: export base image cleanly if external logo blocks CORS canvas taint
+          }
+        }
+
+        // Trigger file download
+        try {
+          const dataUrl = canvas.toDataURL("image/png");
+          const link = document.createElement("a");
+          const slug = state.selectedProducts.join("-").toLowerCase().replace(/[^a-z0-9]+/g, "-");
+          link.download = `studio-ai-${slug}-${state.ratio.replace(":", "x")}.png`;
+          link.href = dataUrl;
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+          showToast("PNG beresolusi tinggi berhasil diunduh!", "success");
+        } catch (err) {
+          // Direct download fallback if canvas tainted
+          const link = document.createElement("a");
+          link.download = `studio-ai-product.png`;
+          link.href = state.currentImageDataUrl;
+          link.click();
+          showToast("Gambar diunduh (tanpa overlay CORS).", "info");
+        }
+      };
+
+      baseImg.src = state.currentImageDataUrl;
+    }
+
+    function loadLogoForCanvas(url) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+        img.src = url;
+      });
+    }
+
+    /**
+     * Randomize Presets for Creative Exploration
+     */
+    function randomizePresets() {
+      // Pick 1 or 2 random products
+      const shuffledProds = [...PRODUCT_PRESETS].sort(() => 0.5 - Math.random());
+      state.selectedProducts = shuffledProds.slice(0, Math.random() > 0.4 ? 2 : 1);
+
+      // Pick random preset for each variable
+      VARIABLE_DEFINITIONS.forEach(def => {
+        const randIdx = Math.floor(Math.random() * def.presets.length);
+        state.variables[def.key] = def.presets[randIdx];
+      });
+
+      state.manualPromptOverride = false;
+      renderProductChips();
+      renderVariables();
+      updateLogoPreview();
+      updatePromptAndSummary();
+      showToast("Preset diacak secara otomatis!", "info");
+    }
+
+    /**
+     * Reset All Variables to Initial Defaults
+     */
+    function resetDefaults() {
+      state.logoUrl = DEFAULT_LOGO_URL;
+      state.logoOverlay = true;
+      state.logoPosition = "top-center";
+      state.logoTone = "auto";
+      state.selectedProducts = ["iPhone 17 Pro", "Apple Watch Series 10"];
+      state.typographyContent = {
+        showGuide: true,
+        placement: "bottom-editorial",
+        contrastMode: "auto",
+        enableHeadline: true,
+        headline: "iPhone 17 Pro. Titanium Redefined.",
+        enableSubheadline: true,
+        subheadline: "A19 Pro chip. Pro camera system. All-day battery.",
+        enableBodyText: true,
+        bodyText: "Engineered from aerospace-grade titanium with an ultra-bright ProMotion display and precision-crafted Apple Watch Series 10.",
+        enableFeatures: true,
+        features: ["A19 Pro Chip", "48MP Fusion Camera", "4:5 Studio Edition"]
+      };
+      state.ratio = "4:5";
+      state.manualPromptOverride = false;
+
+      VARIABLE_DEFINITIONS.forEach(v => {
+        state.variables[v.key] = v.defaultValue;
+      });
+
+      el.logoUrlInput.value = DEFAULT_LOGO_URL;
+      el.logoOverlayToggle.checked = true;
+      el.logoPositionSelect.value = "top-center";
+      el.logoToneSelect.value = "auto";
+
+      el.typoStagePreviewToggle.checked = true;
+      el.typoPlacementSelect.value = "bottom-editorial";
+      el.typoContrastSelect.value = "auto";
+      el.enableHeadline.checked = true;
+      el.headlineInput.value = state.typographyContent.headline;
+      el.enableSubheadline.checked = true;
+      el.subheadlineInput.value = state.typographyContent.subheadline;
+      el.enableBodyText.checked = true;
+      el.bodyTextInput.value = state.typographyContent.bodyText;
+      el.enableFeatures.checked = true;
+      el.featureInput.value = "";
+
+      const defaultRatio = RATIO_OPTIONS[0];
+      applyStageRatio(defaultRatio);
+      renderProductChips();
+      renderVariables();
+      renderTypographyControls();
+      renderRatioPills();
+      updateLogoPreview();
+      updateTypographyStagePreview();
+      updatePromptAndSummary();
+      showToast("Pengaturan dikembalikan ke default.", "info");
+    }
+
+    /**
+     * Event Listeners Setup
+     */
+    function bindEvents() {
+      // Theme toggle
+      el.btnTheme.addEventListener("click", () => {
+        document.documentElement.classList.toggle("dark");
+        updateLogoPreview();
+        updateTypographyStagePreview();
+      });
+
+      // Logo URL input listener
+      el.logoUrlInput.addEventListener("input", (e) => {
+        const val = e.target.value.trim();
+        if (val && val !== "(Uploaded Local Logo)") {
+          state.logoUrl = val;
+          updateLogoPreview();
+        }
+      });
+
+      // Local Logo Upload
+      el.logoFileUpload.addEventListener("change", (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          state.logoUrl = ev.target.result;
+          el.logoUrlInput.value = "(Uploaded Local Logo)";
+          updateLogoPreview();
+          showToast("Logo lokal berhasil dimuat.", "success");
+        };
+        reader.readAsDataURL(file);
+      });
+
+      // Logo Overlay Toggle, Position, Tone
+      el.logoOverlayToggle.addEventListener("change", (e) => {
+        state.logoOverlay = e.target.checked;
+        updateLogoPreview();
+        updateTypographyStagePreview();
+        updatePromptAndSummary();
+      });
+
+      el.logoPositionSelect.addEventListener("change", (e) => {
+        state.logoPosition = e.target.value;
+        updateLogoPreview();
+        updateTypographyStagePreview();
+        updatePromptAndSummary();
+      });
+
+      el.logoToneSelect.addEventListener("change", (e) => {
+        state.logoTone = e.target.value;
+        updateLogoPreview();
+      });
+
+      // Typography Content Controls
+      el.typoStagePreviewToggle.addEventListener("change", (e) => {
+        state.typographyContent.showGuide = e.target.checked;
+        updateTypographyStagePreview();
+      });
+
+      el.typoPlacementSelect.addEventListener("change", (e) => {
+        state.typographyContent.placement = e.target.value;
+        updateTypographyStagePreview();
+        updatePromptAndSummary();
+      });
+
+      el.typoContrastSelect.addEventListener("change", (e) => {
+        state.typographyContent.contrastMode = e.target.value;
+        updateTypographyStagePreview();
+        updatePromptAndSummary();
+      });
+
+      el.enableHeadline.addEventListener("change", (e) => {
+        state.typographyContent.enableHeadline = e.target.checked;
+        updateTypographyStagePreview();
+        updatePromptAndSummary();
+      });
+
+      el.headlineInput.addEventListener("input", (e) => {
+        state.typographyContent.headline = e.target.value;
+        renderTypographyControls();
+        updateTypographyStagePreview();
+        updatePromptAndSummary();
+      });
+
+      el.enableSubheadline.addEventListener("change", (e) => {
+        state.typographyContent.enableSubheadline = e.target.checked;
+        updateTypographyStagePreview();
+        updatePromptAndSummary();
+      });
+
+      el.subheadlineInput.addEventListener("input", (e) => {
+        state.typographyContent.subheadline = e.target.value;
+        renderTypographyControls();
+        updateTypographyStagePreview();
+        updatePromptAndSummary();
+      });
+
+      el.enableBodyText.addEventListener("change", (e) => {
+        state.typographyContent.enableBodyText = e.target.checked;
+        updateTypographyStagePreview();
+        updatePromptAndSummary();
+      });
+
+      el.bodyTextInput.addEventListener("input", (e) => {
+        state.typographyContent.bodyText = e.target.value;
+        renderTypographyControls();
+        updateTypographyStagePreview();
+        updatePromptAndSummary();
+      });
+
+      el.enableFeatures.addEventListener("change", (e) => {
+        state.typographyContent.enableFeatures = e.target.checked;
+        updateTypographyStagePreview();
+        updatePromptAndSummary();
+      });
+
+      const addCustomFeature = () => {
+        const val = el.featureInput.value.trim();
+        if (!val) return;
+        if (!state.typographyContent.features.includes(val)) {
+          state.typographyContent.features.push(val);
+        }
+        state.typographyContent.enableFeatures = true;
+        el.enableFeatures.checked = true;
+        el.featureInput.value = "";
+        renderTypographyControls();
+        updateTypographyStagePreview();
+        updatePromptAndSummary();
+      };
+
+      el.btnAddFeature.addEventListener("click", addCustomFeature);
+      el.featureInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          addCustomFeature();
+        }
+      });
+
+      // Add Custom Product
+      const addCustomProduct = () => {
+        const val = el.customProductInput.value.trim();
+        if (!val) return;
+        if (!PRODUCT_PRESETS.includes(val) && !state.customProducts.includes(val)) {
+          state.customProducts.push(val);
+        }
+        if (!state.selectedProducts.includes(val)) {
+          state.selectedProducts.push(val);
+        }
+        el.customProductInput.value = "";
+        renderProductChips();
+        updatePromptAndSummary();
+      };
+
+      el.btnAddProduct.addEventListener("click", addCustomProduct);
+      el.customProductInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          addCustomProduct();
+        }
+      });
+
+      // Prompt manual edit tracking
+      el.promptTextarea.addEventListener("input", () => {
+        state.manualPromptOverride = true;
+        el.btnSyncPrompt.classList.remove("hidden");
+      });
+
+      el.btnSyncPrompt.addEventListener("click", () => {
+        state.manualPromptOverride = false;
+        updatePromptAndSummary();
+      });
+
+      // Copy prompt using execCommand fallback for iframe safety
+      el.btnCopyPrompt.addEventListener("click", () => {
+        el.promptTextarea.select();
+        document.execCommand("copy");
+        window.getSelection()?.removeAllRanges();
+        showToast("Prompt disalin ke clipboard!", "success");
+      });
+
+      // Action buttons
+      el.btnGenerate.addEventListener("click", handleGenerate);
+      el.btnDownload.addEventListener("click", handleDownloadPng);
+      el.btnRandomize.addEventListener("click", randomizePresets);
+      el.btnReset.addEventListener("click", resetDefaults);
+    }
+
+    /**
+     * Initialize App on Load
+     */
+    window.addEventListener("DOMContentLoaded", () => {
+      renderProductChips();
+      renderVariables();
+      renderTypographyControls();
+      renderRatioPills();
+      applyStageRatio(RATIO_OPTIONS[0]);
+      updateLogoPreview();
+      updateTypographyStagePreview();
+      updatePromptAndSummary();
+      bindEvents();
+    });
+  </script>
+</body>
+</html>

@@ -1973,6 +1973,10 @@ function audMerge(a,b){if(!b||typeof b!=="object")return structuredClone(a);cons
 function audKey(c,s){return c+"/"+s;}
 function audSave(){
 const a=state.architecture;if(!a.categoryId||!a.subcategoryId)return;
+const visualMap={background:"background",composition:"composition",lighting:"lighting",visualStyle:"visual"};
+Object.entries(visualMap).forEach(([target,source])=>{if(a.visualDirection[target])a.visualDirection[target].value=state.variables[source]||"";});
+if(a.visualDirection.colorMood)a.visualDirection.colorMood.value=state.variables.colorMood||"";
+if(a.visualDirection.negativeConstraints)a.visualDirection.negativeConstraints.value=state.variables.negativeConstraints||"";
 a.userConfigurations[audKey(a.categoryId,a.subcategoryId)]={layout:structuredClone(a.layout),textElements:structuredClone(a.textElements),visualDirection:structuredClone(a.visualDirection)};
 try{localStorage.setItem(AUD_KEY,JSON.stringify({categories:AUD_CATEGORIES,profiles:a.userConfigurations}));}catch(e){}
 }
@@ -2045,13 +2049,13 @@ const t=Object.entries(state.architecture.textElements).filter(([k,v])=>v.enable
 return t.length?"Text Element Skills: "+t.map(([k,v])=>k+" ("+v.hierarchy+", "+(v.placement||"appropriate editorial placement")+"): render exact text \""+v.value.trim()+"\"").join("; ")+". Maintain exact spelling and legibility.":"Typography: no text overlay.";
 }
 function audVisualPrompt(){
-const d=state.architecture.visualDirection;return [
-d.background?.enabled&&d.background.value?"Background: "+d.background.value+".":"",
-d.composition?.enabled&&d.composition.value?"Composition: "+d.composition.value+".":"",
-d.lighting?.enabled&&d.lighting.value?"Lighting: "+d.lighting.value+".":"",
-d.visualStyle?.enabled&&d.visualStyle.value?"Visual style: "+d.visualStyle.value+".":"",
-d.colorMood?.enabled&&d.colorMood.value?"Color & mood: "+d.colorMood.value+".":"",
-d.negativeConstraints?.enabled&&d.negativeConstraints.value?"Negative constraints: "+d.negativeConstraints.value+".":""
+const d=state.architecture.visualDirection,v=state.variables;return [
+d.background?.enabled&&v.background?"Background: "+v.background+".":"",
+d.composition?.enabled&&v.composition?"Composition: "+v.composition+".":"",
+d.lighting?.enabled&&v.lighting?"Lighting: "+v.lighting+".":"",
+d.visualStyle?.enabled&&v.visual?"Visual style: "+v.visual+".":"",
+d.colorMood?.enabled&&v.colorMood?"Color & mood: "+v.colorMood+".":"",
+d.negativeConstraints?.enabled&&v.negativeConstraints?"Negative constraints: "+v.negativeConstraints+".":""
 ].filter(Boolean).join(" ");
 }
 function buildCompiledPrompt(){
@@ -2060,6 +2064,20 @@ const layout=a.layout.enabled?(a.layout.preset||automatic):automatic;
 const parts=[audSubject(),"Layout framing: "+layout+". Arrange "+count+" selected product"+(count===1?"":"s")+" with clear hierarchy and balanced spacing.",audTextPrompt(),audVisualPrompt(),state.logoOverlay?"Brand placement: leave clear breathing room at "+state.logoPosition.replace("-"," ")+" for brand logo placement.":"",v.quality?"Rendering quality: "+v.quality+".":"","Aspect ratio: "+state.ratio+"."].filter(Boolean);
 a.lastCompiledSections=parts;audValidate();return parts.join(" ");
 }
+const audRenderVariablesBase=renderVariables;
+renderVariables=function(){
+audRenderVariablesBase();
+const keys={background:"background",composition:"composition",lighting:"lighting",visual:"visualStyle",colorMood:"colorMood",negativeConstraints:"negativeConstraints"};
+Object.entries(keys).forEach(([key,target])=>{
+const def=VARIABLE_DEFINITIONS.find(x=>x.key===key),wrap=el.variablesContainer?.children[VARIABLE_DEFINITIONS.indexOf(def)];
+if(!def||!wrap||wrap.querySelector("[data-aud-enabled]"))return;
+const cfg=state.architecture.visualDirection[target];if(!cfg)return;
+const label=document.createElement("label");label.className="flex items-center gap-2 text-[10px] text-zinc-500";
+const toggle=document.createElement("input");toggle.type="checkbox";toggle.checked=cfg.enabled;toggle.dataset.audEnabled="true";
+label.append(toggle,document.createTextNode("Aktifkan "+def.label));wrap.insertBefore(label,wrap.firstChild);
+toggle.addEventListener("change",()=>{cfg.enabled=toggle.checked;audSave();updatePromptAndSummary();});
+});
+};
 const audUpdateBase=updatePromptAndSummary;
 updatePromptAndSummary=function(){audUpdateBase();const n=document.getElementById("audPromptMode");if(n){n.textContent=state.manualPromptOverride?"MANUAL MODE":"AUTO MODE";n.className="text-[10px] font-semibold px-2 py-1 rounded-lg "+(state.manualPromptOverride?"bg-amber-500/10 text-amber-600":"bg-blue-500/10 text-blue-600");}};
 const audResetBase=resetDefaults;

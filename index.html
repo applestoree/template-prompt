@@ -2175,6 +2175,19 @@ const a=state.architecture,count=state.selectedProducts.length,auto=count===1?"S
 if(count>1&&/single hero/i.test(a.layout.preset||""))return {value:auto,conflict:{type:"Automatic Resolution",message:"Layout otomatis disesuaikan untuk jumlah produk."}};
 return {value:a.layout.enabled?(a.layout.preset||auto):auto,conflict:null};
 }
+/* Keep this builder in the same script scope as audBuildFinalPrompt.
+   Gemini Canvas may isolate separate script blocks, so do not depend on
+   audBuildTextPrompt declared by the earlier AUD architecture script. */
+function audBuildTextPrompt(){
+const textElements=state.architecture?.textElements||{};
+const entries=Object.entries(textElements).filter(([key,cfg])=>cfg?.enabled&&String(cfg.value||"").trim());
+if(!entries.length)return "Typography: no text overlay.";
+return "Text Element Skills: "+entries.map(([key,cfg])=>{
+const hierarchy=cfg.hierarchy||"supporting";
+const placement=cfg.placement||"appropriate editorial placement";
+return key+" ("+hierarchy+", "+placement+"): render exact text \""+String(cfg.value).trim()+"\"";
+}).join("; ")+". Maintain exact spelling, hierarchy, placement, and legibility.";
+}
 function audBuildFinalPrompt(){
 const layout=audResolveLayout(),parts=[
 audBuildProductSubject(),"Layout framing: "+layout.value+".",

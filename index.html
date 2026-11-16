@@ -2100,5 +2100,88 @@ audSyncLegacy();renderVariables();updatePromptAndSummary();
 });
 </script>
 
+
+<script>
+/* AUD-09 Product data and explicit modular Prompt Builders */
+state.productData=state.productData||{};
+[...PRODUCT_PRESETS,...state.customProducts].forEach((name,index)=>{
+if(!state.productData[name])state.productData[name]={id:"product-"+index+"-"+name.toLowerCase().replace(/[^a-z0-9]+/g,"-"),name,category:"",model:"",specifications:{},materials:[],colors:[],referenceImages:[],source:PRODUCT_PRESETS.includes(name)?"preset":"custom",verified:false};
+});
+function audGetProduct(name){
+if(!state.productData[name])state.productData[name]={id:"product-"+name.toLowerCase().replace(/[^a-z0-9]+/g,"-"),name,category:"",model:"",specifications:{},materials:[],colors:[],referenceImages:[],source:"custom",verified:false};
+return state.productData[name];
+}
+function audSaveProductData(){try{localStorage.setItem(AUD_KEY,JSON.stringify({categories:AUD_CATEGORIES,profiles:state.architecture.userConfigurations,products:state.productData}));}catch(e){}}
+const audLoadProductsBase=audLoad;
+audLoad=function(){audLoadProductsBase();try{const x=JSON.parse(localStorage.getItem(AUD_KEY)||"{}");if(x.products)state.productData={...state.productData,...x.products};}catch(e){}};
+function audRenderProductDetails(){
+const card=el.productChips?.closest(".bg-white");if(!card)return;
+let host=document.getElementById("audProductDetails");if(!host){host=document.createElement("div");host.id="audProductDetails";host.className="mt-3 pt-3 border-t border-black/[0.06] space-y-2";card.appendChild(host);}
+host.innerHTML="";
+state.selectedProducts.forEach((name,index)=>{
+const p=audGetProduct(name),section=document.createElement("details");section.className="rounded-xl border border-black/[0.06] dark:border-white/[0.08] p-3";
+if(index===0)section.open=true;
+const summary=document.createElement("summary");summary.className="text-xs font-semibold cursor-pointer";summary.textContent=(index===0?"Primary Product · ":"Supporting Product · ")+name;
+const body=document.createElement("div");body.className="grid grid-cols-1 gap-2 mt-3";
+const fields=[["model","Model",p.model],["category","Category",p.category],["specifications","Specifications (key: value)",JSON.stringify(p.specifications||{})],["materials","Materials",Array.isArray(p.materials)?p.materials.join(", "):p.materials],["colors","Colors",Array.isArray(p.colors)?p.colors.join(", "):p.colors],["referenceImages","Reference Image URLs",Array.isArray(p.referenceImages)?p.referenceImages.join(", "):p.referenceImages]];
+fields.forEach(([key,label,value])=>{
+const input=document.createElement(key==="specifications"?"textarea":"input");input.className="w-full text-[11px] p-2 rounded-lg bg-[#F5F5F7] dark:bg-[#222225]";input.placeholder=label;input.value=value||"";
+if(key==="specifications")input.rows=2;
+input.addEventListener("change",()=>{
+if(key==="specifications"){try{p[key]=JSON.parse(input.value||"{}");}catch(e){showToast("Specifications harus berupa JSON yang valid.","error");return;}}
+else if(["materials","colors","referenceImages"].includes(key))p[key]=input.value.split(",").map(x=>x.trim()).filter(Boolean);
+else p[key]=input.value;
+audSaveProductData();updatePromptAndSummary();
+});
+body.appendChild(input);
+});
+const verify=document.createElement("label");verify.className="flex items-center gap-2 text-[11px]";
+const check=document.createElement("input");check.type="checkbox";check.checked=!!p.verified;check.addEventListener("change",()=>{p.verified=check.checked;audSaveProductData();updatePromptAndSummary();});
+verify.append(check,document.createTextNode("Product data verified by user"));body.appendChild(verify);
+section.append(summary,body);host.appendChild(section);
+});
+}
+const audProductChipsBase=renderProductChips;
+renderProductChips=function(){audProductChipsBase();audRenderProductDetails();};
+function audBuildProductSubject(){
+const entries=state.selectedProducts.map((name,i)=>{
+const p=audGetProduct(name),details=[];
+if(p.model)details.push("model "+p.model);
+if(p.category)details.push("category "+p.category);
+if(p.specifications&&Object.keys(p.specifications).length)details.push("specifications "+JSON.stringify(p.specifications));
+if(p.materials?.length)details.push("materials "+p.materials.join(", "));
+if(p.colors?.length)details.push("colors "+p.colors.join(", "));
+if(p.referenceImages?.length)details.push("visual references "+p.referenceImages.join(", "));
+return name+" ("+(i===0?"primary hero":"supporting product")+(details.length?"; "+details.join("; "):"")+")";
+});
+return "Product subjects: "+entries.join("; ")+". Preserve each product's verified specifications and visual identity. Do not invent unspecified product attributes.";
+}
+function audBuildBackground(){const d=state.architecture.visualDirection.background;return d?.enabled&&state.variables.background?"Background environment: "+state.variables.background+".":"";}
+function audBuildComposition(){const d=state.architecture.visualDirection.composition;return d?.enabled&&state.variables.composition?"Composition and camera direction: "+state.variables.composition+".":"";}
+function audBuildLighting(){const d=state.architecture.visualDirection.lighting;return d?.enabled&&state.variables.lighting?"Lighting setup: "+state.variables.lighting+".":"";}
+function audBuildVisualStyle(){const d=state.architecture.visualDirection.visualStyle;return d?.enabled&&state.variables.visual?"Visual aesthetic: "+state.variables.visual+".":"";}
+function audBuildColorMood(){const d=state.architecture.visualDirection.colorMood;return d?.enabled&&state.variables.colorMood?"Color and mood: "+state.variables.colorMood+".":"";}
+function audBuildNegativeConstraints(){const d=state.architecture.visualDirection.negativeConstraints;return d?.enabled&&state.variables.negativeConstraints?"Negative constraints: "+state.variables.negativeConstraints+".":"";}
+function audBuildBrand(){return state.logoOverlay?"Leave clean breathing room at "+state.logoPosition.replace("-"," ")+" for brand logo placement.":"";}
+function audBuildQuality(){return state.variables.quality?"Rendering quality: "+state.variables.quality+".":"";}
+function audResolveLayout(){
+const a=state.architecture,count=state.selectedProducts.length,auto=count===1?"Single Hero Product":count===2?"Dual Product Composition":"Multi Product Composition";
+if(count>1&&/single hero/i.test(a.layout.preset||""))return {value:auto,conflict:{type:"Automatic Resolution",message:"Layout otomatis disesuaikan untuk jumlah produk."}};
+return {value:a.layout.enabled?(a.layout.preset||auto):auto,conflict:null};
+}
+function audBuildFinalPrompt(){
+const layout=audResolveLayout(),parts=[
+audBuildProductSubject(),"Layout framing: "+layout.value+".",
+audBuildTextPrompt(),audBuildBackground(),audBuildComposition(),audBuildLighting(),audBuildVisualStyle(),audBuildColorMood(),audBuildNegativeConstraints(),
+audBuildBrand(),audBuildQuality(),"Aspect ratio: "+state.ratio+"."
+].filter(Boolean);
+if(layout.conflict)state.architecture.conflicts=[...(state.architecture.conflicts||[]),layout.conflict];
+state.architecture.lastCompiledSections=parts;return parts.join(" ");
+}
+buildCompiledPrompt=function(){audValidate();return audBuildFinalPrompt();};
+audLoadProductsBase();
+window.addEventListener("DOMContentLoaded",()=>{audRenderProductDetails();});
+</script>
+
 </body>
 </html>

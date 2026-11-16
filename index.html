@@ -1978,7 +1978,7 @@ Object.entries(visualMap).forEach(([target,source])=>{if(a.visualDirection[targe
 if(a.visualDirection.colorMood)a.visualDirection.colorMood.value=state.variables.colorMood||"";
 if(a.visualDirection.negativeConstraints)a.visualDirection.negativeConstraints.value=state.variables.negativeConstraints||"";
 a.userConfigurations[audKey(a.categoryId,a.subcategoryId)]={layout:structuredClone(a.layout),textElements:structuredClone(a.textElements),visualDirection:structuredClone(a.visualDirection)};
-try{localStorage.setItem(AUD_KEY,JSON.stringify({categories:AUD_CATEGORIES,profiles:a.userConfigurations}));}catch(e){}
+try{localStorage.setItem(AUD_KEY,JSON.stringify({categories:AUD_CATEGORIES,profiles:a.userConfigurations,products:state.productData||{}}));}catch(e){}
 }
 function audLoad(){try{const x=JSON.parse(localStorage.getItem(AUD_KEY)||"{}");if(x.profiles)state.architecture.userConfigurations=x.profiles;if(Array.isArray(x.categories)&&x.categories.length)AUD_CATEGORIES.splice(0,AUD_CATEGORIES.length,...x.categories);}catch(e){}}
 function audSyncLegacy(){
@@ -2082,7 +2082,7 @@ toggle.addEventListener("change",()=>{cfg.enabled=toggle.checked;audSave();updat
 });
 };
 const audUpdateBase=updatePromptAndSummary;
-updatePromptAndSummary=function(){audUpdateBase();const n=document.getElementById("audPromptMode");if(n){n.textContent=state.manualPromptOverride?"MANUAL MODE":"AUTO MODE";n.className="text-[10px] font-semibold px-2 py-1 rounded-lg "+(state.manualPromptOverride?"bg-amber-500/10 text-amber-600":"bg-blue-500/10 text-blue-600");}};
+updatePromptAndSummary=function(){audUpdateBase();audSave();const n=document.getElementById("audPromptMode");if(n){n.textContent=state.manualPromptOverride?"MANUAL MODE":"AUTO MODE";n.className="text-[10px] font-semibold px-2 py-1 rounded-lg "+(state.manualPromptOverride?"bg-amber-500/10 text-amber-600":"bg-blue-500/10 text-blue-600");}};
 const audResetBase=resetDefaults;
 resetDefaults=function(){audResetBase();const a=state.architecture;a.textElements=JSON.parse(JSON.stringify(AUD_DEFAULT_TEXT));a.layout={enabled:true,preset:AUD_LAYOUTS[0],configuration:{}};a.visualDirection={background:{enabled:true,value:state.variables.background},composition:{enabled:true,value:state.variables.composition},lighting:{enabled:true,value:state.variables.lighting},visualStyle:{enabled:true,value:state.variables.visual},colorMood:{enabled:true,value:AUD_VISUAL[0].defaultValue},negativeConstraints:{enabled:false,value:""}};audRenderSkills();audSave();updatePromptAndSummary();};
 audLoad();

@@ -1903,6 +1903,11 @@
       el.promptTextarea.addEventListener("input", () => {
         state.manualPromptOverride = true;
         el.btnSyncPrompt.classList.remove("hidden");
+        const mode = document.getElementById("audPromptMode");
+        if (mode) {
+          mode.textContent = "MANUAL MODE";
+          mode.className = "text-[10px] font-semibold px-2 py-1 rounded-lg bg-amber-500/10 text-amber-600";
+        }
       });
 
       el.btnSyncPrompt.addEventListener("click", () => {

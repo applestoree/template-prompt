@@ -2179,7 +2179,7 @@ if(layout.conflict)state.architecture.conflicts=[...(state.architecture.conflict
 state.architecture.lastCompiledSections=parts;return parts.join(" ");
 }
 buildCompiledPrompt=function(){audValidate();return audBuildFinalPrompt();};
-audLoadProductsBase();
+audLoad();
 window.addEventListener("DOMContentLoaded",()=>{audRenderProductDetails();});
 </script>
 
